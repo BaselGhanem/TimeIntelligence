@@ -1,1204 +1,846 @@
 <!DOCTYPE html>
-
 <html lang="ar" dir="rtl">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Time Brain V3 | باسل غانم</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Time Brain V5 | محرك ذكاء الوقت</title>
+    
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
-
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
-
         :root {
-
-            --primary: #099999;
-
-            --primary-light: #e6fafa;
-
-            --primary-dark: #066666;
-
-            --secondary: #2c3e50;
-
-            --bg: #f4f7f6;
-
-            --surface: #ffffff;
-
-            --deep-work: #6c5ce7;
-
-            --danger: #e74c3c;
-
-            --success: #27ae60;
-
-            --text-main: #2c3e50;
-
-            --text-light: #7f8c8d;
-
-            --shadow: 0 4px 20px rgba(0,0,0,0.08);
-
-            --radius: 12px;
-
+            --bg-dark: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.7);
+            --bg-glass: rgba(15, 23, 42, 0.85);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #06b6d4; /* Cyan/Teal - Medical Tech */
+            --accent-glow: rgba(6, 182, 212, 0.3);
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --border-radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
-
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         
-
-        body { background-color: var(--bg); color: var(--text-main); height: 100vh; display: flex; overflow: hidden; }
-
-
-
-        /* Sidebar */
-
-        .sidebar {
-
-            width: 80px; background: var(--surface); display: flex; flex-direction: column; align-items: center;
-
-            padding: 20px 0; border-left: 1px solid rgba(0,0,0,0.05); z-index: 90; box-shadow: var(--shadow);
-
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
         }
 
-        .logo { 
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
 
-            width: 50px; height: 50px; background: var(--primary); color: white; border-radius: 50%; 
+        /* Sidebar (Desktop) */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(12px);
+            border-left: 1px solid rgba(255,255,255,0.05);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            position: fixed;
+            height: 100vh;
+            right: 0;
+            z-index: 100;
+            transition: var(--transition);
+        }
 
-            display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 20px; margin-bottom: 40px;
+        .brand {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--accent);
+            text-shadow: 0 0 15px var(--accent-glow);
+            letter-spacing: -1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
         }
 
         .nav-item {
-
-            width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;
-
-            margin-bottom: 15px; border-radius: 12px; color: var(--text-light); cursor: pointer;
-
-            transition: all 0.3s ease; font-size: 1.2rem;
-
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
         }
 
-        .nav-item.active, .nav-item:hover { background: var(--primary-light); color: var(--primary); }
-
-
-
-        /* Main Layout */
-
-        .main-container { flex: 1; display: flex; flex-direction: column; height: 100%; position: relative; overflow: hidden; }
-
-
-
-        /* Header */
-
-        .header {
-
-            height: 80px; background: var(--surface); padding: 0 30px; display: flex; align-items: center; justify-content: space-between;
-
-            border-bottom: 1px solid #eee; flex-shrink: 0;
-
+        .nav-item:hover, .nav-item.active {
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--accent);
+            transform: translateX(-5px);
         }
 
-        .user-info h2 { font-size: 1.2rem; font-weight: 700; color: var(--secondary); }
-
-        .user-info span { font-size: 0.8rem; color: var(--primary); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
-
-
-
-        .date-filters { display: flex; gap: 10px; background: var(--bg); padding: 5px; border-radius: 10px; }
-
-        .date-btn { 
-
-            border: none; background: transparent; padding: 8px 15px; border-radius: 8px; 
-
-            cursor: pointer; font-weight: 600; color: var(--text-light); transition: 0.2s;
-
+        /* Main Content */
+        .main-content {
+            margin-right: 280px; /* Sidebar width */
+            width: calc(100% - 280px);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
         }
 
-        .date-btn:hover { background: rgba(0,0,0,0.05); }
-
-
-
-        .kpi-wrapper { display: flex; gap: 20px; }
-
-        .kpi-card { text-align: center; padding: 5px 15px; border-right: 1px solid #eee; }
-
-        .kpi-card:last-child { border: none; }
-
-        .kpi-val { font-weight: 800; font-size: 1.1rem; color: var(--primary); }
-
-        .kpi-label { font-size: 0.7rem; color: var(--text-light); }
-
-        
-
-        /* Start Button */
-
-        .start-btn {
-
-            background: var(--secondary); color: white; border: none; padding: 8px 20px; border-radius: 8px;
-
-            cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px;
-
-        }
-
-        .start-btn:hover { background: #1a252f; }
-
-
-
-        /* Views */
-
-        .view-section { display: none; height: calc(100% - 80px); width: 100%; }
-
-        .view-section.active-view { display: block; }
-
-
-
-        /* Grid System */
-
-        .content-grid { display: grid; grid-template-columns: 350px 1fr 350px; height: 100%; }
-
-
-
-        /* Panels */
-
-        .panel { padding: 20px; height: 100%; overflow-y: auto; background: var(--bg); }
-
-        .panel-white { background: var(--surface); border-left: 1px solid #eee; }
-
-        .panel-right { border-right: 1px solid #eee; background: var(--surface); }
-
-
-
-        /* Task Items */
-
-        .task-item {
-
-            background: var(--surface); border: 1px solid #eee; padding: 12px; border-radius: 8px;
-
-            margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
-
-            border-right: 4px solid var(--primary); transition: transform 0.2s; cursor: pointer;
-
-        }
-
-        .task-item:hover { transform: translateX(-3px); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-
-        .task-meta { font-size: 0.75rem; color: var(--text-light); margin-top: 4px; display: flex; gap: 10px; }
-
-
-
-        /* Timeline */
-
-        .timeline-container { width: 100%; max-width: 600px; margin: 0 auto; position: relative; padding-left: 60px; padding-bottom: 50px; }
-
-        .time-slot { height: 60px; border-bottom: 1px dashed rgba(0,0,0,0.1); position: relative; }
-
-        .time-label { position: absolute; left: -50px; top: -10px; font-size: 0.75rem; color: var(--text-light); }
-
-        
-
-        .block {
-
-            position: absolute; left: 10px; right: 10px; border-radius: 6px; padding: 5px 10px;
-
-            color: white; font-size: 0.8rem; display: flex; flex-direction: column; justify-content: center;
-
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); overflow: hidden; cursor: pointer; z-index: 10;
-
-        }
-
-        .block-task { background: var(--primary); border-right: 3px solid var(--primary-dark); }
-
-        .block-deep { background: var(--deep-work); opacity: 0.9; border: 1px dashed rgba(255,255,255,0.3); }
-
-        .block-break { background: repeating-linear-gradient(45deg, #bdc3c7, #bdc3c7 10px, #b0b6bb 10px, #b0b6bb 20px); color: #555; z-index: 5; }
-
-        
-
-        .now-line { position: absolute; left: 0; right: 0; height: 2px; background: var(--danger); z-index: 20; pointer-events: none; }
-
-
-
-        /* Dashboard V2 */
-
+        /* Grid Layout */
         .dashboard-grid {
-
-            padding: 30px; display: grid; grid-template-columns: repeat(4, 1fr);
-
-            grid-template-rows: auto auto 1fr; gap: 20px; height: 100%; overflow-y: auto; background: #f8f9fa;
-
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
         }
 
-        .dash-card {
-
-            background: white; border-radius: 16px; padding: 20px;
-
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; flex-direction: column;
-
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            transition: var(--transition);
         }
 
-        .dash-card.span-2 { grid-column: span 2; }
-
-        .dash-card.span-4 { grid-column: span 4; }
-
-        .stat-value { font-size: 2rem; font-weight: 800; color: var(--secondary); }
-
-        .chart-box { height: 250px; position: relative; }
-
-
-
-        /* MODAL POPUP */
-
-        .modal-overlay {
-
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-
-            background: rgba(0,0,0,0.6); z-index: 1000; backdrop-filter: blur(5px);
-
-            justify-content: center; align-items: center;
-
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+            border-color: var(--accent);
         }
+
+        .kpi-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+            background: linear-gradient(45deg, #fff, var(--text-muted));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .kpi-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .kpi-icon {
+            position: absolute;
+            top: 1.5rem;
+            left: 1.5rem;
+            font-size: 1.5rem;
+            color: var(--accent);
+            opacity: 0.8;
+        }
+
+        /* Verdict Section */
+        .verdict-box {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(15, 23, 42, 0.9));
+            border: 1px solid var(--accent);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+        }
+        
+        .verdict-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #e2e8f0;
+        }
+
+        /* Timeline & Lists */
+        .timeline-container {
+            margin-top: 1rem;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            margin-bottom: 0.8rem;
+            border-right: 4px solid transparent;
+            transition: var(--transition);
+        }
+
+        .activity-item:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .activity-time {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--accent);
+            min-width: 80px;
+        }
+
+        .activity-details {
+            flex-grow: 1;
+            padding: 0 1rem;
+        }
+
+        .activity-category {
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+            margin-bottom: 4px;
+            display: inline-block;
+        }
+
+        /* Buttons & Forms */
+        .btn {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-family: 'Tajawal';
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: #22d3ee;
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--text-muted);
+            color: var(--text-muted);
+        }
+        
+        .btn-outline:hover {
+            border-color: var(--text-main);
+            color: var(--text-main);
+        }
+
+        .fab {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            width: 60px;
+            height: 60px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #000;
+            box-shadow: 0 10px 25px var(--accent-glow);
+            cursor: pointer;
+            z-index: 900;
+            transition: var(--transition);
+        }
+        
+        .fab:hover { transform: scale(1.1) rotate(90deg); }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active { display: flex; }
 
         .modal-content {
-
-            background: white; width: 450px; padding: 30px; border-radius: 20px;
-
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: slideUp 0.3s ease;
-
+            background: #1e293b;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 500px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-family: 'Tajawal';
+        }
 
+        input:focus, select:focus {
+            border-color: var(--accent);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none; /* Hide standard sidebar */
+            }
+            .main-content {
+                margin-right: 0;
+                width: 100%;
+                padding: 1rem;
+                padding-bottom: 80px; /* Space for bottom nav */
+            }
+            .mobile-nav {
+                display: flex;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: #1e293b;
+                border-top: 1px solid rgba(255,255,255,0.1);
+                padding: 10px;
+                justify-content: space-around;
+                z-index: 800;
+            }
+            .mobile-nav-item {
+                text-align: center;
+                color: var(--text-muted);
+                font-size: 0.8rem;
+            }
+            .mobile-nav-item i {
+                display: block;
+                font-size: 1.2rem;
+                margin-bottom: 4px;
+            }
+            .mobile-nav-item.active { color: var(--accent); }
+            .fab { bottom: 5rem; left: 1.5rem; }
+        }
         
-
-        .input-group { margin-bottom: 15px; }
-
-        .input-group label { display: block; font-size: 0.85rem; color: var(--text-light); margin-bottom: 8px; font-weight: 600; }
-
-        .form-control { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; font-size: 1rem; }
-
-        .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
-
-        
-
-        .cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
-
-        .cat-btn {
-
-            padding: 10px; border: 1px solid #eee; border-radius: 8px; font-size: 0.8rem;
-
-            cursor: pointer; text-align: center; transition: 0.2s; background: #f9f9f9;
-
+        @media (min-width: 769px) {
+            .mobile-nav { display: none; }
         }
 
-        .cat-btn:hover { background: #eee; }
-
-        .cat-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
-
-
-
-        .fab-btn {
-
-            position: fixed; bottom: 30px; left: 30px; width: 60px; height: 60px;
-
-            background: var(--primary); color: white; border-radius: 50%;
-
-            display: flex; align-items: center; justify-content: center; font-size: 24px;
-
-            box-shadow: 0 10px 20px rgba(9, 153, 153, 0.4); cursor: pointer; transition: 0.2s; z-index: 500;
-
-        }
-
-        .fab-btn:hover { transform: scale(1.1); }
-
-
-
+        /* Utilities */
         .hidden { display: none !important; }
-
-        
-
-        /* Start Work Modal */
-
-        .time-picker-simple { display: flex; gap: 10px; justify-content: center; margin-top: 10px;}
+        .text-accent { color: var(--accent); }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
 
     </style>
-
 </head>
-
 <body>
 
-
-
-    <div class="sidebar">
-
-        <div class="logo">B</div>
-
-        <div class="nav-item active" id="nav-calendar" onclick="switchView('calendar')"><i class="fas fa-calendar-alt"></i></div>
-
-        <div class="nav-item" id="nav-analytics" onclick="switchView('analytics')"><i class="fas fa-chart-pie"></i></div>
-
-        <div class="nav-item" onclick="backupData()"><i class="fas fa-cloud-download-alt"></i></div>
-
-    </div>
-
-
-
-    <div class="main-container">
-
-        <div class="header">
-
-            <div class="user-info">
-
-                <h2>باسل غانم</h2>
-
-                <span>Pharma Intelligence Architect</span>
-
+    <aside class="sidebar">
+        <div class="brand">
+            <i class="fa-solid fa-brain"></i> Time Brain V5
+        </div>
+        <div class="nav-menu">
+            <div class="nav-item active" onclick="showSection('dashboard')">
+                <i class="fa-solid fa-chart-pie"></i> لوحة القيادة
             </div>
-
-            
-
-            <div style="display: flex; align-items: center; gap: 20px;">
-
-                <button class="start-btn" id="btn-start-work" onclick="openStartWorkModal()">
-
-                    <i class="fas fa-clock"></i> تسجيل بدء الدوام
-
-                </button>
-
-
-
-                <div class="date-filters">
-
-                    <button class="date-btn" onclick="changeDate(-1)"><i class="fas fa-chevron-right"></i></button>
-
-                    <input type="date" id="datePicker" class="date-btn" style="border:none; outline:none; font-family:'Tajawal'">
-
-                    <button class="date-btn" onclick="changeDate(1)"><i class="fas fa-chevron-left"></i></button>
-
-                    <button class="date-btn" onclick="resetToToday()">اليوم</button>
-
-                </div>
-
+            <div class="nav-item" onclick="showSection('tasks')">
+                <i class="fa-solid fa-list-check"></i> سجل المهام
             </div>
-
-
-
-            <div class="kpi-wrapper">
-
-                <div class="kpi-card">
-
-                    <div class="kpi-val" id="kpi-arrival">--:--</div>
-
-                    <div class="kpi-label">وصول</div>
-
-                </div>
-
-                <div class="kpi-card">
-
-                    <div class="kpi-val" id="kpi-exit" style="color: var(--danger)">--:--</div>
-
-                    <div class="kpi-label">مغادرة</div>
-
-                </div>
-
-                <div class="kpi-card">
-
-                    <div class="kpi-val" id="kpi-focus">0h</div>
-
-                    <div class="kpi-label">Focus</div>
-
-                </div>
-
+            <div class="nav-item" onclick="exportData()">
+                <i class="fa-solid fa-file-export"></i> تصدير JSON
             </div>
+            <div class="nav-item" style="color: var(--success);" onclick="document.getElementById('fileInput').click()">
+                <i class="fa-solid fa-file-excel"></i> استعادة + Excel
+            </div>
+            <input type="file" id="fileInput" hidden accept=".json" onchange="importAndConvert(this)">
+        </div>
+        
+        <div style="margin-top: auto;">
+            <div class="kpi-label">تاريخ اليوم</div>
+            <input type="date" id="globalDate" style="background:transparent; border:none; color:var(--accent); font-size:1rem; font-weight:bold;">
+        </div>
+    </aside>
 
+    <main class="main-content">
+        
+        <div class="flex-between">
+            <div>
+                <h2 style="margin:0;">أهلاً باسل، <span class="text-accent">جاهز للقرار؟</span></h2>
+                <p class="kpi-label">Sales Analyst | Executive Mode</p>
+            </div>
+            <div>
+                <button class="btn btn-outline" onclick="generateCEOReport()"><i class="fa-solid fa-copy"></i> تقرير CEO</button>
+            </div>
         </div>
 
-
-
-        <div id="view-calendar" class="view-section active-view">
-
-            <div class="content-grid">
-
-                <div class="panel panel-white">
-
-                    <div class="input-group">
-
-                        <h3 style="font-size: 1rem; margin-bottom: 20px; color: var(--secondary)">سجل اليوم</h3>
-
-                    </div>
-
-                    <div id="taskListContainer"></div>
-
-                </div>
-
-
-
-                <div class="panel">
-
-                    <div class="timeline-container" id="timelineContainer"></div>
-
-                </div>
-
-
-
-                <div class="panel panel-right">
-
-                    <div class="dash-card">
-
-                        <div class="stat-value" id="daily-focus-percent" style="font-size: 1.5rem">0%</div>
-
-                        <div style="font-size:0.8rem; color:var(--text-light)">نسبة المهام التحليلية (Deep Work)</div>
-
-                    </div>
-
-                    <br>
-
-                    <div class="dash-card" style="padding:15px">
-
-                         <div style="font-weight:bold; font-size:0.9rem; margin-bottom:5px;">CEO Summary:</div>
-
-                         <p id="ceo-text" style="font-size:0.8rem; color:var(--text-light); line-height:1.4">...</p>
-
-                         <button onclick="copyCEOReport()" style="margin-top:10px; width:100%; border:1px solid #eee; background:white; cursor:pointer; padding:5px; border-radius:5px;">نسخ</button>
-
-                    </div>
-
-                </div>
-
+        <div id="dashboard-section">
+            <div class="verdict-box">
+                <div class="kpi-label text-accent"><i class="fa-solid fa-gavel"></i> الحكم اليومي (Daily Verdict)</div>
+                <div class="verdict-text" id="dailyVerdict">جاري تحليل البيانات...</div>
             </div>
-
-            
-
-            <div class="fab-btn" onclick="openTaskModal()">
-
-                <i class="fas fa-plus"></i>
-
-            </div>
-
-        </div>
-
-
-
-        <div id="view-analytics" class="view-section" style="background: #f8f9fa;">
 
             <div class="dashboard-grid">
-
-                <div class="dash-card"><div style="color:var(--text-light)">إجمالي الساعات</div><div class="stat-value" id="dash-total-hours">0h</div></div>
-
-                <div class="dash-card"><div style="color:var(--text-light)">المهام المنجزة</div><div class="stat-value" id="dash-task-count">0</div></div>
-
-                <div class="dash-card"><div style="color:var(--text-light)">Field Visits</div><div class="stat-value" id="dash-field-visits">0</div></div>
-
-                <div class="dash-card"><div style="color:var(--text-light)">Sales Analysis</div><div class="stat-value" id="dash-analysis-hours">0h</div></div>
-
-
-
-                <div class="dash-card span-2"><div class="chart-box"><canvas id="monthlyTrendChart"></canvas></div></div>
-
-                <div class="dash-card span-2"><div class="chart-box"><canvas id="monthlyCatChart"></canvas></div></div>
-
-                
-
-                <div class="dash-card span-4">
-
-                    <h3>أداء الشهر (Top Activities)</h3>
-
-                    <table style="width:100%; text-align:right; margin-top:10px; font-size:0.9rem; border-collapse: collapse;">
-
-                        <thead style="border-bottom:1px solid #eee; color:var(--text-light)"><tr><th>المهمة</th><th>التاريخ</th><th>النوع</th><th>المدة</th></tr></thead>
-
-                        <tbody id="topTasksTable"></tbody>
-
-                    </table>
-
+                <div class="card">
+                    <div class="kpi-label">ساعات العمل الكلية</div>
+                    <div class="kpi-value" id="totalHours">00:00</div>
+                    <i class="fa-solid fa-clock kpi-icon"></i>
                 </div>
-
+                <div class="card">
+                    <div class="kpi-label">ساعات التركيز (Focus)</div>
+                    <div class="kpi-value" style="color: var(--success);" id="focusHours">00:00</div>
+                    <i class="fa-solid fa-crosshairs kpi-icon"></i>
+                </div>
+                <div class="card">
+                    <div class="kpi-label">نسبة التركيز %</div>
+                    <div class="kpi-value" id="focusPercent">0%</div>
+                    <i class="fa-solid fa-percent kpi-icon"></i>
+                </div>
+                <div class="card">
+                    <div class="kpi-label">عدد الزيارات</div>
+                    <div class="kpi-value" id="visitsCount">0</div>
+                    <i class="fa-solid fa-location-dot kpi-icon"></i>
+                </div>
+                <div class="card">
+                    <div class="kpi-label">وقت الوصول</div>
+                    <div class="kpi-value" id="arrivalTime">--:--</div>
+                    <i class="fa-solid fa-door-open kpi-icon"></i>
+                </div>
+                <div class="card">
+                    <div class="kpi-label">الخروج المتوقع</div>
+                    <div class="kpi-value" style="color: var(--warning);" id="exitTime">--:--</div>
+                    <i class="fa-solid fa-person-walking-arrow-right kpi-icon"></i>
+                </div>
             </div>
 
+            <div class="dashboard-grid" style="margin-top: 2rem; grid-template-columns: 2fr 1fr;">
+                <div class="card">
+                    <div class="kpi-label">التدفق الزمني (Work Trend)</div>
+                    <canvas id="lineChart" height="150"></canvas>
+                </div>
+                <div class="card">
+                    <div class="kpi-label">توزيع الجهد</div>
+                    <canvas id="donutChart" height="200"></canvas>
+                </div>
+            </div>
         </div>
 
+        <div id="tasks-section" class="hidden">
+            <h3>سجل الأنشطة (Timeline)</h3>
+            <div id="timelineList" class="timeline-container">
+                </div>
+        </div>
+
+    </main>
+
+    <div class="mobile-nav">
+        <div class="mobile-nav-item active" onclick="showSection('dashboard')">
+            <i class="fa-solid fa-chart-pie"></i> لوحة
+        </div>
+        <div class="mobile-nav-item" onclick="showSection('tasks')">
+            <i class="fa-solid fa-list"></i> المهام
+        </div>
+        <div class="mobile-nav-item" onclick="generateCEOReport()">
+            <i class="fa-solid fa-file-contract"></i> تقرير
+        </div>
     </div>
 
+    <div class="fab" onclick="openModal()">
+        <i class="fa-solid fa-plus"></i>
+    </div>
 
-
-    <div class="modal-overlay" id="taskModal">
-
+    <div class="modal" id="taskModal">
         <div class="modal-content">
-
-            <h2 style="margin-bottom:20px; color:var(--secondary)">إضافة نشاط جديد</h2>
-
+            <h3 class="text-accent">إضافة نشاط (Activity)</h3>
             
+            <label>الفئة (Category)</label>
+            <select id="taskCat">
+                <option value="Sales Analysis">Sales Analysis (Focus)</option>
+                <option value="Deep Work">Deep Work (Focus)</option>
+                <option value="Forecasting">Forecasting (Focus)</option>
+                <option value="Field Visit">Field Visit</option>
+                <option value="Meeting">Meeting</option>
+                <option value="Arrival">Arrival Check-in</option>
+                <option value="Break">Break / Lunch</option>
+                <option value="Admin Work">Admin Work</option>
+            </select>
 
-            <div class="input-group">
+            <label>الوصف</label>
+            <input type="text" id="taskDesc" placeholder="تفاصيل النشاط...">
 
-                <label>نوع النشاط (Category)</label>
-
-                <div class="cat-grid" id="catGrid">
-
-                    </div>
-
-                <input type="hidden" id="selectedCat">
-
-            </div>
-
-
-
-            <div class="input-group">
-
-                <label>تفاصيل المهمة</label>
-
-                <input type="text" id="taskTitle" class="form-control" placeholder="مثال: تحليل مبيعات Q3 - مستشفى الأمل" list="prevTasks">
-
-                <datalist id="prevTasks"></datalist>
-
-            </div>
-
-
-
-            <div class="input-group" style="display:flex; gap:15px">
-
-                <div style="flex:1">
-
-                    <label>وقت البدء</label>
-
-                    <input type="time" id="startTime" class="form-control">
-
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <div>
+                    <label>البدء</label>
+                    <input type="time" id="taskStart">
                 </div>
-
-                <div style="flex:1">
-
+                <div>
                     <label>المدة (دقيقة)</label>
-
-                    <input type="number" id="taskDuration" class="form-control" placeholder="60" value="30">
-
+                    <input type="number" id="taskDur" placeholder="مثلاً: 45">
                 </div>
-
             </div>
 
-
-
-            <div style="display:flex; gap:10px; margin-top:20px;">
-
-                <button class="start-btn" style="flex:1; background:var(--primary); justify-content:center" onclick="saveTask()">حفظ وإغلاق</button>
-
-                <button class="start-btn" style="background:#eee; color:#333; width:auto;" onclick="closeModal()">إلغاء</button>
-
+            <div style="margin-top: 1rem; display:flex; justify-content: flex-end; gap:10px;">
+                <button class="btn btn-outline" onclick="closeModal()">إلغاء</button>
+                <button class="btn" onclick="saveTask()">حفظ النشاط</button>
             </div>
-
         </div>
-
     </div>
-
-
-
-    <div class="modal-overlay" id="startWorkModal">
-
-        <div class="modal-content" style="width:350px; text-align:center">
-
-            <h2 style="margin-bottom:10px">صباح الخير يا باسل</h2>
-
-            <p style="color:var(--text-light); margin-bottom:20px">متى وصلت إلى المكتب اليوم؟</p>
-
-            <input type="time" id="arrivalPicker" class="form-control" style="font-size:1.5rem; text-align:center; margin-bottom:20px;">
-
-            <button class="start-btn" style="width:100%; justify-content:center; background:var(--primary)" onclick="confirmStartWork()">تسجيل الحضور</button>
-
-        </div>
-
-    </div>
-
-
 
     <script>
-
-        // --- PHARMA SALES CONFIG ---
-
-        const CONFIG = {
-
-            breakStart: "13:00", breakEnd: "14:00",
-
-            colors: {
-
-                'Sales Analysis': '#099999', // Teal (Core)
-
-                'Field Visit': '#e67e22',    // Orange (Action)
-
-                'CRM & Data': '#9b59b6',     // Purple (Admin)
-
-                'Forecasting': '#34495e',    // Dark Blue (Strategy)
-
-                'Reporting': '#27ae60',      // Green (Result)
-
-                'Meeting': '#f1c40f',        // Yellow
-
-                'Deep Work': '#6c5ce7',      // Focus
-
-                'Admin': '#95a5a6'           // Grey
-
-            },
-
-            categories: ['Sales Analysis', 'Field Visit', 'CRM & Data', 'Forecasting', 'Reporting', 'Meeting', 'Deep Work', 'Admin']
-
+        // --- Core Data Engine ---
+        const APP_KEY = 'basel_tasks_v5';
+        let tasks = JSON.parse(localStorage.getItem(APP_KEY)) || [];
+        
+        // Analytics Rules
+        const RULES = {
+            focus: ['Sales Analysis', 'Deep Work', 'Forecasting'],
+            visits: ['Field Visit'],
+            excludeFromTotal: ['Arrival', 'Break']
         };
 
-
-
-        let state = {
-
-            currentDate: new Date().toISOString().split('T')[0],
-
-            tasks: JSON.parse(localStorage.getItem('basel_tasks')) || [],
-
-            currentView: 'calendar'
-
-        };
-
-
-
-        function init() {
-
-            document.getElementById('datePicker').value = state.currentDate;
-
-            setupDatalist();
-
-            renderAll();
-
-            renderCatGrid();
-
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('globalDate').valueAsDate = new Date();
+            initCharts();
+            renderDashboard();
             
-
-            // Set default arrival to current time rounded
-
+            // Set default time in modal
             const now = new Date();
+            document.getElementById('taskStart').value = now.toTimeString().substring(0,5);
+        });
 
-            const timeStr = now.toTimeString().substring(0,5);
+        document.getElementById('globalDate').addEventListener('change', renderDashboard);
 
-            document.getElementById('arrivalPicker').value = timeStr;
-
-        }
-
-
-
-        // --- Categories Logic ---
-
-        function renderCatGrid() {
-
-            const grid = document.getElementById('catGrid');
-
-            grid.innerHTML = '';
-
-            CONFIG.categories.forEach(cat => {
-
-                const btn = document.createElement('div');
-
-                btn.className = 'cat-btn';
-
-                btn.innerText = cat;
-
-                btn.onclick = () => selectCat(cat, btn);
-
-                grid.appendChild(btn);
-
-            });
-
-        }
-
-
-
-        function selectCat(cat, btnElement) {
-
-            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
-
-            btnElement.classList.add('selected');
-
-            document.getElementById('selectedCat').value = cat;
-
-        }
-
-
-
-        // --- Start Work Logic ---
-
-        function openStartWorkModal() {
-
-            document.getElementById('startWorkModal').style.display = 'flex';
-
-        }
-
-        function confirmStartWork() {
-
-            const time = document.getElementById('arrivalPicker').value;
-
-            // Add a zero duration marker task for Arrival
-
-            state.tasks.push({
-
-                id: Date.now(), date: state.currentDate, title: '📍 تسجيل دخول',
-
-                start: time, end: time, category: 'Admin', type: 'arrival' // Zero duration
-
-            });
-
-            saveData();
-
-            document.getElementById('startWorkModal').style.display = 'none';
-
-        }
-
-
-
-        // --- Add Task Modal Logic ---
-
-        function openTaskModal() {
-
-            const modal = document.getElementById('taskModal');
-
-            modal.style.display = 'flex';
-
-            
-
-            // Auto-Suggest Start Time
-
-            const dailyTasks = state.tasks.filter(t => t.date === state.currentDate).sort((a,b) => a.end.localeCompare(b.end));
-
-            if (dailyTasks.length > 0) {
-
-                const lastTask = dailyTasks[dailyTasks.length - 1];
-
-                document.getElementById('startTime').value = lastTask.end;
-
-            } else {
-
-                // If no tasks, default to now
-
-                const now = new Date();
-
-                document.getElementById('startTime').value = now.toTimeString().substring(0,5);
-
-            }
-
-            
-
-            // Default Category
-
-            if(!document.getElementById('selectedCat').value) {
-
-                selectCat('Sales Analysis', document.querySelector('.cat-btn'));
-
-            }
-
-        }
-
-
-
-        function closeModal() {
-
-            document.getElementById('taskModal').style.display = 'none';
-
-            document.getElementById('startWorkModal').style.display = 'none';
-
-        }
-
-
+        // --- Logic: Data Operations ---
 
         function saveTask() {
+            const date = document.getElementById('globalDate').value;
+            const category = document.getElementById('taskCat').value;
+            const desc = document.getElementById('taskDesc').value;
+            const start = document.getElementById('taskStart').value;
+            const duration = parseInt(document.getElementById('taskDur').value) || 0;
 
-            const title = document.getElementById('taskTitle').value;
+            if(!start) return alert('يرجى تحديد وقت البدء');
 
-            const start = document.getElementById('startTime').value;
-
-            const duration = parseInt(document.getElementById('taskDuration').value);
-
-            const cat = document.getElementById('selectedCat').value;
-
-
-
-            if (!title || !start || !duration || !cat) { alert("يرجى تعبئة كافة الحقول"); return; }
-
-
-
-            // Calculate End Time
-
-            const [h, m] = start.split(':').map(Number);
-
-            const totalStartMins = h * 60 + m;
-
-            const totalEndMins = totalStartMins + duration;
-
+            // Calculate End Time logic could be added here for overlap check
             
+            const newTask = {
+                id: Date.now(),
+                date: date,
+                category: category,
+                description: desc,
+                startTime: start,
+                duration: duration
+            };
 
-            const endH = Math.floor(totalEndMins / 60);
-
-            const endM = totalEndMins % 60;
-
-            const end = `${endH.toString().padStart(2,'0')}:${endM.toString().padStart(2,'0')}`;
-
-
-
-            state.tasks.push({ id: Date.now(), date: state.currentDate, title, start, end, category: cat, type: 'manual' });
-
-            saveData();
-
-            
-
-            // Reset & Close
-
-            document.getElementById('taskTitle').value = '';
-
-            closeModal();
-
-        }
-
-
-
-        // --- Core Functions ---
-
-        function saveData() {
-
-            localStorage.setItem('basel_tasks', JSON.stringify(state.tasks));
-
-            if (state.currentView === 'calendar') renderAll(); else renderDashboard();
-
-        }
-
-
-
-        function analyzeDay(dateString) {
-
-            let rawTasks = state.tasks.filter(t => t.date === dateString).sort((a,b) => a.start.localeCompare(b.start));
-
-            
-
-            // Filter out 'arrival' markers for the list, but keep for calculation
-
-            const arrivalTask = rawTasks.find(t => t.type === 'arrival');
-
-            const arrival = arrivalTask ? arrivalTask.start : (rawTasks.length > 0 ? rawTasks[0].start : null);
-
-            
-
-            // Calculate Exit
-
-            let exit = null;
-
-            if (arrival) {
-
-                const [h, m] = arrival.split(':').map(Number);
-
-                let exitH = h + 9;
-
-                exit = `${exitH.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
-
+            // Overlap Warning (Simplified)
+            const overlap = tasks.find(t => t.date === date && t.startTime === start);
+            if(overlap) {
+                if(!confirm('يوجد نشاط آخر في نفس وقت البدء. هل تريد المتابعة؟')) return;
             }
 
-
-
-            // Gap Logic
-
-            let processedTasks = [];
-
-            let lastEnd = arrival;
-
-
-
-            rawTasks.forEach(task => {
-
-                // Skip markers in visualization if zero duration
-
-                if(task.start === task.end) return; 
-
-
-
-                if (lastEnd && task.start > lastEnd) {
-
-                    processedTasks.push({ id: 'gap', title: 'Deep Work / Unlogged', start: lastEnd, end: task.start, category: 'Deep Work', type: 'auto' });
-
-                }
-
-                processedTasks.push(task);
-
-                lastEnd = task.end;
-
-            });
-
-
-
-            return { arrival, exit, processedTasks, rawTasks };
-
-        }
-
-
-
-        function renderAll() {
-
-            const { arrival, exit, processedTasks, rawTasks } = analyzeDay(state.currentDate);
-
+            tasks.push(newTask);
+            tasks.sort((a,b) => a.startTime.localeCompare(b.startTime));
+            localStorage.setItem(APP_KEY, JSON.stringify(tasks));
             
-
-            // Toggle Start Button visibility
-
-            document.getElementById('btn-start-work').style.display = arrival ? 'none' : 'flex';
-
-
-
-            document.getElementById('kpi-arrival').innerText = arrival || '--:--';
-
-            document.getElementById('kpi-exit').innerText = exit || '--:--';
-
-
-
-            // Calc Focus
-
-            let focusMins = 0;
-
-            let totalMins = 0;
-
-            processedTasks.forEach(t => { 
-
-                const d = diffMins(t.start, t.end);
-
-                totalMins += d;
-
-                if (['Deep Work', 'Sales Analysis', 'Forecasting'].includes(t.category)) focusMins += d;
-
-            });
-
-            document.getElementById('kpi-focus').innerText = formatMins(focusMins);
-
-            document.getElementById('daily-focus-percent').innerText = totalMins ? Math.round((focusMins/totalMins)*100) + '%' : '0%';
-
-
-
-            // Task List
-
-            const list = document.getElementById('taskListContainer');
-
-            list.innerHTML = '';
-
-            rawTasks.filter(t => t.type !== 'arrival').forEach(t => {
-
-                const div = document.createElement('div');
-
-                div.className = 'task-item';
-
-                div.style.borderRightColor = CONFIG.colors[t.category] || '#ccc';
-
-                div.innerHTML = `<div><b>${t.title}</b><div class="task-meta"><i class="fas fa-tag"></i> ${t.category} | ${diffMins(t.start, t.end)}m</div></div>
-
-                                 <button onclick="deleteTask(${t.id})" style="color:red;border:none;background:none"><i class="fas fa-trash"></i></button>`;
-
-                list.appendChild(div);
-
-            });
-
-
-
-            // Timeline
-
-            const tl = document.getElementById('timelineContainer');
-
-            tl.innerHTML = '';
-
-            for(let i=7; i<=19; i++) tl.innerHTML += `<div class="time-slot"><span class="time-label">${i}:00</span></div>`;
-
-            drawBlock(tl, { start: CONFIG.breakStart, end: CONFIG.breakEnd, title: 'Break', type: 'break' });
-
-            processedTasks.forEach(t => drawBlock(tl, t));
-
-
-
-            // CEO Report
-
-            const topCat = getTopCategory(rawTasks);
-
-            document.getElementById('ceo-text').innerText = `يوم ${state.currentDate}:\nتم البدء ${arrival}. التركيز انصب على ${topCat}.\nإجمالي مهام: ${rawTasks.length}.`;
-
+            closeModal();
+            renderDashboard();
         }
 
+        function deleteTask(id) {
+            if(confirm('حذف هذا السجل؟')) {
+                tasks = tasks.filter(t => t.id !== id);
+                localStorage.setItem(APP_KEY, JSON.stringify(tasks));
+                renderDashboard();
+            }
+        }
 
+        // --- Logic: Rendering & Analytics ---
 
         function renderDashboard() {
-
-            const currentMonth = state.currentDate.substring(0, 7);
-
-            const monthTasks = state.tasks.filter(t => t.date.startsWith(currentMonth) && t.type !== 'arrival');
-
+            const selectedDate = document.getElementById('globalDate').value;
+            const dailyTasks = tasks.filter(t => t.date === selectedDate);
             
-
-            let totalMins = 0;
-
+            // 1. Calculations
+            let totalMin = 0;
+            let focusMin = 0;
             let visits = 0;
+            let arrival = '--:--';
 
-            let analysisMins = 0;
-
-            let catTotals = {};
-
-            let dailyHours = {};
-
-
-
-            monthTasks.forEach(t => {
-
-                const d = diffMins(t.start, t.end);
-
-                totalMins += d;
-
-                catTotals[t.category] = (catTotals[t.category] || 0) + d;
-
-                dailyHours[t.date] = (dailyHours[t.date] || 0) + d;
-
+            dailyTasks.forEach(t => {
+                // Arrival
+                if(t.category === 'Arrival') arrival = t.startTime;
                 
+                // Visits
+                if(RULES.visits.includes(t.category)) visits++;
 
-                if(t.category === 'Field Visit') visits++;
-
-                if(t.category === 'Sales Analysis') analysisMins += d;
-
+                // Focus & Total
+                if(!RULES.excludeFromTotal.includes(t.category)) {
+                    totalMin += t.duration;
+                    if(RULES.focus.includes(t.category)) {
+                        focusMin += t.duration;
+                    }
+                }
             });
 
-
-
-            document.getElementById('dash-total-hours').innerText = (totalMins/60).toFixed(1) + 'h';
-
-            document.getElementById('dash-task-count').innerText = monthTasks.length;
-
-            document.getElementById('dash-field-visits').innerText = visits;
-
-            document.getElementById('dash-analysis-hours').innerText = (analysisMins/60).toFixed(1) + 'h';
-
-
-
-            // Trend Chart
-
-            const days = Object.keys(dailyHours).sort();
-
-            new Chart(document.getElementById('monthlyTrendChart'), {
-
-                type: 'bar',
-
-                data: {
-
-                    labels: days.map(d => d.substring(8)),
-
-                    datasets: [{ label: 'Hours', data: days.map(d => (dailyHours[d]/60).toFixed(1)), backgroundColor: CONFIG.colors['Sales Analysis'] }]
-
-                },
-
-                options: { maintainAspectRatio: false }
-
-            });
-
-
-
-            // Cat Chart
-
-            new Chart(document.getElementById('monthlyCatChart'), {
-
-                type: 'doughnut',
-
-                data: {
-
-                    labels: Object.keys(catTotals),
-
-                    datasets: [{ data: Object.values(catTotals), backgroundColor: Object.keys(catTotals).map(k => CONFIG.colors[k] || '#333') }]
-
-                },
-
-                options: { maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
-
-            });
-
+            // 2. Update UI Cards
+            document.getElementById('totalHours').innerText = minToTime(totalMin);
+            document.getElementById('focusHours').innerText = minToTime(focusMin);
+            document.getElementById('visitsCount').innerText = visits;
+            document.getElementById('arrivalTime').innerText = arrival;
             
+            const focusPct = totalMin > 0 ? Math.round((focusMin / totalMin) * 100) : 0;
+            document.getElementById('focusPercent').innerText = focusPct + '%';
 
-             // Top Tasks Table
+            // Calculate Expected Exit (Assuming 8.5 hours from arrival if exists)
+            if(arrival !== '--:--') {
+                const [h, m] = arrival.split(':').map(Number);
+                const exitDate = new Date();
+                exitDate.setHours(h + 8, m + 30);
+                document.getElementById('exitTime').innerText = 
+                    exitDate.getHours().toString().padStart(2,'0') + ':' + 
+                    exitDate.getMinutes().toString().padStart(2,'0');
+            } else {
+                document.getElementById('exitTime').innerText = '--:--';
+            }
 
-             const sortedTasks = [...monthTasks].sort((a,b) => diffMins(b.start, b.end) - diffMins(a.start, a.end)).slice(0, 5);
+            // 3. Daily Verdict
+            generateVerdict(focusPct, visits, totalMin);
 
-            const tableBody = document.getElementById('topTasksTable');
+            // 4. Update Charts
+            updateCharts(dailyTasks);
 
-            tableBody.innerHTML = '';
+            // 5. Render Timeline
+            renderTimeline(dailyTasks);
+        }
 
-            sortedTasks.forEach(t => {
+        function generateVerdict(focusPct, visits, totalMin) {
+            const el = document.getElementById('dailyVerdict');
+            let text = "";
+            
+            if(totalMin < 10) {
+                text = "يوم جديد.. بانتظار بدء العمليات.";
+            } else if (focusPct > 60) {
+                text = "🔥 أداء استثنائي! تركيز عالي جداً في المهام التحليلية. هذا يوم إنتاجية حقيقية.";
+            } else if (visits > 2) {
+                text = "📍 يوم ميداني نشط. البيانات القادمة من السوق ستكون غزيرة اليوم.";
+            } else if (focusPct < 30 && totalMin > 200) {
+                text = "⚠️ تحذير: يوم مزدحم ولكن بإنتاجية منخفضة (Low Focus). تشتت عالي.";
+            } else {
+                text = "يوم متوازن. الأداء ضمن المعدلات الطبيعية.";
+            }
+            el.innerText = text;
+        }
 
-                const tr = document.createElement('tr');
+        function renderTimeline(dailyTasks) {
+            const container = document.getElementById('timelineList');
+            container.innerHTML = '';
+            
+            dailyTasks.forEach(t => {
+                let borderShow = RULES.focus.includes(t.category) ? 'border-color: var(--success);' : '';
+                if(t.category === 'Arrival') borderShow = 'border-color: var(--accent);';
 
-                tr.innerHTML = `<td>${t.title}</td><td>${t.date}</td><td>${t.category}</td><td>${diffMins(t.start, t.end)}m</td>`;
+                const html = `
+                <div class="activity-item" style="${borderShow}">
+                    <div class="activity-time">${t.startTime}</div>
+                    <div class="activity-details">
+                        <span class="activity-category" style="color:var(--accent)">${t.category}</span>
+                        <div style="font-size:0.95rem;">${t.description}</div>
+                        <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
+                            ${t.duration > 0 ? t.duration + ' دقيقة' : ''}
+                        </div>
+                    </div>
+                    <button class="btn-outline" style="border:none; color:var(--danger)" onclick="deleteTask(${t.id})">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>`;
+                container.innerHTML += html;
+            });
+        }
 
-                tableBody.appendChild(tr);
+        // --- Charts ---
+        let lineChartInstance = null;
+        let donutChartInstance = null;
 
+        function initCharts() {
+            // Line Chart
+            const ctxL = document.getElementById('lineChart').getContext('2d');
+            lineChartInstance = new Chart(ctxL, {
+                type: 'line',
+                data: { labels: [], datasets: [{ label: 'المدة (دقيقة)', data: [], borderColor: '#06b6d4', tension: 0.4 }] },
+                options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { display: false } } }
             });
 
+            // Donut Chart
+            const ctxD = document.getElementById('donutChart').getContext('2d');
+            donutChartInstance = new Chart(ctxD, {
+                type: 'doughnut',
+                data: { labels: [], datasets: [{ data: [], backgroundColor: ['#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#6366f1'] }] },
+                options: { responsive: true, plugins: { legend: { position: 'right', labels: { color: '#fff' } } }, cutout: '70%' }
+            });
         }
 
+        function updateCharts(data) {
+            // Prep data for Donut
+            const catMap = {};
+            data.forEach(t => {
+                if(t.duration > 0) {
+                    catMap[t.category] = (catMap[t.category] || 0) + t.duration;
+                }
+            });
+            
+            donutChartInstance.data.labels = Object.keys(catMap);
+            donutChartInstance.data.datasets[0].data = Object.values(catMap);
+            donutChartInstance.update();
 
-
-        // --- Helpers ---
-
-        function switchView(v) { state.currentView = v; document.querySelectorAll('.view-section').forEach(e => e.classList.remove('active-view')); document.getElementById(`view-${v}`).classList.add('active-view'); if(v==='analytics') renderDashboard(); else renderAll(); }
-
-        function changeDate(d) { const dt = new Date(state.currentDate); dt.setDate(dt.getDate()+d); state.currentDate = dt.toISOString().split('T')[0]; document.getElementById('datePicker').value = state.currentDate; renderAll(); }
-
-        function resetToToday() { state.currentDate = new Date().toISOString().split('T')[0]; document.getElementById('datePicker').value = state.currentDate; renderAll(); }
-
-        function timeToMin(t) { const [h, m] = t.split(':').map(Number); return h*60 + m; }
-
-        function diffMins(s, e) { return timeToMin(e) - timeToMin(s); }
-
-        function formatMins(m) { return `${Math.floor(m/60)}h ${m%60}m`; }
-
-        function deleteTask(id) { if(confirm('Delete?')) { state.tasks = state.tasks.filter(t => t.id !== id); saveData(); } }
-
-        function setupDatalist() { const l = document.getElementById('prevTasks'); l.innerHTML = ''; [...new Set(state.tasks.map(t => t.title))].forEach(t => { const o = document.createElement('option'); o.value = t; l.appendChild(o); }); }
-
-        function copyCEOReport() { navigator.clipboard.writeText(document.getElementById('ceo-text').innerText); alert('Copied'); }
-
-        function getTopCategory(tasks) { if(!tasks.length) return 'N/A'; const counts = {}; tasks.forEach(t => counts[t.category] = (counts[t.category]||0)+1); return Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b); }
-
-        function drawBlock(container, task) {
-
-            const startM = timeToMin(task.start); const endM = timeToMin(task.end);
-
-            const top = startM - (7*60); const height = endM - startM;
-
-            if (top < 0) return;
-
-            const el = document.createElement('div');
-
-            el.className = 'block'; el.style.top = `${top}px`; el.style.height = `${height}px`;
-
-            if (task.type === 'break') { el.classList.add('block-break'); el.innerText = 'Break'; }
-
-            else if (task.category === 'Deep Work') { el.classList.add('block-deep'); el.innerText = 'Deep Work'; }
-
-            else { el.classList.add('block-task'); el.style.backgroundColor = CONFIG.colors[task.category] || '#333'; el.innerHTML = `<b>${task.title}</b>`; }
-
-            container.appendChild(el);
-
+            // Prep data for Line (Trend)
+            lineChartInstance.data.labels = data.map(t => t.startTime);
+            lineChartInstance.data.datasets[0].data = data.map(t => t.duration);
+            lineChartInstance.update();
         }
 
-        function backupData() {
+        // --- Utilities ---
 
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state.tasks));
-
-            const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", "basel_pharma_brain.json"); document.body.appendChild(dl); dl.click(); dl.remove();
-
+        function minToTime(min) {
+            const h = Math.floor(min / 60);
+            const m = min % 60;
+            return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
         }
 
+        function openModal() { document.getElementById('taskModal').classList.add('active'); }
+        function closeModal() { document.getElementById('taskModal').classList.remove('active'); }
 
+        function showSection(id) {
+            if(id === 'dashboard') {
+                document.getElementById('dashboard-section').classList.remove('hidden');
+                document.getElementById('tasks-section').classList.add('hidden');
+            } else {
+                document.getElementById('dashboard-section').classList.add('hidden');
+                document.getElementById('tasks-section').classList.remove('hidden');
+            }
+        }
 
-        init();
+        // --- EXPORT / IMPORT ENGINE (The Core Value) ---
 
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(tasks));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "basel_time_brain_backup.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        function importAndConvert(input) {
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const json = JSON.parse(e.target.result);
+                // Save to local
+                localStorage.setItem(APP_KEY, JSON.stringify(json));
+                tasks = json;
+                
+                // AUTO CONVERT TO EXCEL
+                generateExcelReport(json);
+                
+                alert('تمت الاستعادة وتوليد ملف Excel بنجاح!');
+                location.reload();
+            };
+            reader.readAsText(file);
+        }
+
+        function generateExcelReport(data) {
+            // Organize Data into Sheets
+            // Sheet 1: Daily Summary (Need to aggregate by date)
+            const summaryMap = {};
+            data.forEach(t => {
+                if(!summaryMap[t.date]) summaryMap[t.date] = { date: t.date, totalMin: 0, focusMin: 0, visits: 0 };
+                if(!RULES.excludeFromTotal.includes(t.category)) summaryMap[t.date].totalMin += t.duration;
+                if(RULES.focus.includes(t.category)) summaryMap[t.date].focusMin += t.duration;
+                if(RULES.visits.includes(t.category)) summaryMap[t.date].visits++;
+            });
+            const sheet1Data = Object.values(summaryMap).map(d => ({
+                Date: d.date,
+                Total_Hours: (d.totalMin/60).toFixed(2),
+                Focus_Hours: (d.focusMin/60).toFixed(2),
+                Visits: d.visits,
+                Focus_Percentage: d.totalMin ? ((d.focusMin/d.totalMin)*100).toFixed(1)+'%' : '0%'
+            }));
+
+            // Sheet 2: Tasks Log (Raw)
+            const sheet2Data = data.map(t => ({
+                Date: t.date,
+                Category: t.category,
+                Start: t.startTime,
+                Duration_Min: t.duration,
+                Description: t.description
+            }));
+
+            // Sheet 3: Focus Analysis
+            const sheet3Data = data.filter(t => RULES.focus.includes(t.category)).map(t => ({
+                Date: t.date,
+                Type: t.category,
+                Duration: t.duration,
+                Note: t.description
+            }));
+
+            // Sheet 4: Visits
+            const sheet4Data = data.filter(t => RULES.visits.includes(t.category)).map(t => ({
+                Date: t.date,
+                Client_Location: t.description,
+                Time: t.startTime
+            }));
+
+            // Create Workbook
+            const wb = XLSX.utils.book_new();
+            
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheet1Data), "Daily Summary");
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheet2Data), "Tasks Log");
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheet3Data), "Focus Analysis");
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheet4Data), "Visits Report");
+
+            // Write File
+            XLSX.writeFile(wb, "TimeBrain_Executive_Report.xlsx");
+        }
+
+        function generateCEOReport() {
+            const tHours = document.getElementById('totalHours').innerText;
+            const fPct = document.getElementById('focusPercent').innerText;
+            const vCount = document.getElementById('visitsCount').innerText;
+            const date = document.getElementById('globalDate').value;
+            
+            const text = `*CEO Report - ${date}*
+----------
+⏱️ Working Hours: ${tHours}
+🧠 Focus Rate: ${fPct}
+📍 Field Visits: ${vCount}
+----------
+Generated by Time Brain V5`;
+
+            navigator.clipboard.writeText(text).then(() => {
+                alert('تم نسخ التقرير المختصر!');
+            });
+        }
     </script>
-
 </body>
-
 </html>
-
