@@ -3,439 +3,333 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Time Brain V5 | محرك ذكاء الوقت</title>
+    <title>Time Brain V5 | Behavior Intelligence System</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
+        /* --- Preloader Styles (Added) --- */
         :root {
+            /* متغيرات النظام الأصلي */
             --bg-dark: #0f172a;
             --bg-card: rgba(30, 41, 59, 0.7);
-            --bg-glass: rgba(15, 23, 42, 0.85);
+            --bg-glass: rgba(15, 23, 42, 0.95);
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --accent: #06b6d4; /* Cyan/Teal - Medical Tech */
+            --accent: #06b6d4; 
             --accent-glow: rgba(6, 182, 212, 0.3);
             --danger: #ef4444;
             --success: #10b981;
             --warning: #f59e0b;
+            --purple: #8b5cf6;
             --border-radius: 16px;
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* متغيرات الـ Preloader */
+            --accent-loader: #099999; 
+            --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
         }
 
+        #preloader {
+            position: fixed; 
+            inset: 0; 
+            background: #000; 
+            z-index: 11000; /* أعلى طبقة فوق كل شيء */
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            flex-direction: column;
+            transition: transform 0.8s var(--ease-smooth);
+        }
+
+        .loader-text span {
+            display: inline-block; 
+            opacity: 0; 
+            transform: translateY(20px);
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem; 
+            color: var(--accent-loader);
+            animation: textReveal 0.5s forwards;
+        }
+
+        @keyframes textReveal { 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        /* --- Existing System Styles --- */
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         
         body {
             font-family: 'Tajawal', sans-serif;
             background-color: var(--bg-dark);
             color: var(--text-main);
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             overflow-x: hidden;
             min-height: 100vh;
             display: flex;
         }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: var(--bg-dark); }
         ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
 
-        /* Sidebar (Desktop) */
         .sidebar {
-            width: 280px;
-            background: var(--bg-glass);
-            backdrop-filter: blur(12px);
-            border-left: 1px solid rgba(255,255,255,0.05);
-            padding: 2rem 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-            position: fixed;
-            height: 100vh;
-            right: 0;
-            z-index: 100;
-            transition: var(--transition);
+            width: 280px; background: var(--bg-glass); backdrop-filter: blur(12px);
+            border-left: 1px solid rgba(255,255,255,0.05); padding: 2rem 1.5rem;
+            display: flex; flex-direction: column; gap: 2rem;
+            position: fixed; height: 100vh; right: 0; z-index: 100; transition: var(--transition);
         }
 
         .brand {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: var(--accent);
+            font-size: 1.6rem; font-weight: 800; color: var(--accent);
             text-shadow: 0 0 15px var(--accent-glow);
-            letter-spacing: -1px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .nav-menu {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
+            display: flex; align-items: center; gap: 10px;
         }
 
         .nav-item {
-            padding: 1rem;
-            border-radius: var(--border-radius);
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 500;
+            padding: 1rem; border-radius: var(--border-radius);
+            color: var(--text-muted); cursor: pointer; transition: var(--transition);
+            display: flex; align-items: center; gap: 12px; font-weight: 500;
         }
-
         .nav-item:hover, .nav-item.active {
-            background: rgba(6, 182, 212, 0.1);
-            color: var(--accent);
-            transform: translateX(-5px);
+            background: rgba(6, 182, 212, 0.1); color: var(--accent); transform: translateX(-5px);
         }
 
-        /* Main Content */
         .main-content {
-            margin-right: 280px; /* Sidebar width */
-            width: calc(100% - 280px);
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
+            margin-right: 280px; width: calc(100% - 280px);
+            padding: 2rem; display: flex; flex-direction: column; gap: 2rem;
         }
 
-        /* Grid Layout */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1.5rem;
+        .decision-layer {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(15, 23, 42, 0.9));
+            border: 1px solid rgba(139, 92, 246, 0.3); border-radius: var(--border-radius);
+            padding: 1.5rem; margin-bottom: 1rem; position: relative; overflow: hidden;
+        }
+        .decision-layer::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--purple);
         }
 
-        /* Cards */
+        .insight-tag {
+            display: inline-block; padding: 4px 12px; border-radius: 20px;
+            font-size: 0.8rem; font-weight: bold; margin-bottom: 10px;
+        }
+        .tag-risk { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
+        .tag-pattern { background: rgba(6, 182, 212, 0.2); color: var(--accent); border: 1px solid var(--accent); }
+
+        .narrative-text {
+            font-size: 1.1rem; line-height: 1.8; color: #e2e8f0;
+            border-right: 3px solid rgba(255,255,255,0.1); padding-right: 15px;
+        }
+
+        .ceo-mode-panel {
+            background: #000; border: 1px solid #333; padding: 2rem;
+            border-radius: var(--border-radius); display: none; animation: fadeIn 0.5s ease;
+        }
+        .ceo-mode-panel.active { display: block; }
+
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
+
         .card {
-            background: var(--bg-card);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: var(--border-radius);
-            padding: 1.5rem;
-            position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-            transition: var(--transition);
+            background: var(--bg-card); border: 1px solid rgba(255,255,255,0.05);
+            border-radius: var(--border-radius); padding: 1.5rem;
+            position: relative; backdrop-filter: blur(10px); transition: var(--transition);
         }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
-            border-color: var(--accent);
-        }
+        .card:hover { transform: translateY(-5px); border-color: var(--accent); }
 
         .kpi-value {
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin: 0.5rem 0;
+            font-size: 2.2rem; font-weight: 700; margin: 0.5rem 0;
             background: linear-gradient(45deg, #fff, var(--text-muted));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
+        .kpi-label { font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .kpi-icon { position: absolute; top: 1.5rem; left: 1.5rem; font-size: 1.5rem; color: var(--accent); opacity: 0.8; }
 
-        .kpi-label {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .kpi-icon {
-            position: absolute;
-            top: 1.5rem;
-            left: 1.5rem;
-            font-size: 1.5rem;
-            color: var(--accent);
-            opacity: 0.8;
-        }
-
-        /* Verdict Section */
-        .verdict-box {
-            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(15, 23, 42, 0.9));
-            border: 1px solid var(--accent);
-            padding: 1.5rem;
-            border-radius: var(--border-radius);
-            margin-bottom: 1rem;
-        }
-        
-        .verdict-text {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            color: #e2e8f0;
-        }
-
-        /* Timeline & Lists */
-        .timeline-container {
-            margin-top: 1rem;
+        .gap-indicator {
+            background: repeating-linear-gradient(45deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.1) 10px, rgba(239, 68, 68, 0.2) 10px, rgba(239, 68, 68, 0.2) 20px);
+            border: 1px dashed var(--danger); color: var(--danger);
+            padding: 10px; margin: 5px 0; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
         }
 
         .activity-item {
-            display: flex;
-            align-items: center;
-            padding: 1rem;
-            background: rgba(255,255,255,0.03);
-            border-radius: 12px;
-            margin-bottom: 0.8rem;
-            border-right: 4px solid transparent;
-            transition: var(--transition);
+            display: flex; align-items: center; padding: 1rem;
+            background: rgba(255,255,255,0.03); border-radius: 12px;
+            margin-bottom: 0.8rem; border-right: 4px solid transparent; transition: var(--transition);
         }
+        .activity-time { font-weight: 700; font-size: 1.1rem; color: var(--accent); min-width: 80px; }
 
-        .activity-item:hover {
-            background: rgba(255,255,255,0.05);
-        }
-
-        .activity-time {
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: var(--accent);
-            min-width: 80px;
-        }
-
-        .activity-details {
-            flex-grow: 1;
-            padding: 0 1rem;
-        }
-
-        .activity-category {
-            font-size: 0.8rem;
-            padding: 2px 8px;
-            border-radius: 4px;
-            background: rgba(255,255,255,0.1);
-            margin-bottom: 4px;
-            display: inline-block;
-        }
-
-        /* Buttons & Forms */
         .btn {
-            background: var(--accent);
-            color: #000;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 700;
-            font-family: 'Tajawal';
-            cursor: pointer;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            background: var(--accent); color: #000; border: none; padding: 10px 20px;
+            border-radius: 8px; font-weight: 700; font-family: 'Tajawal'; cursor: pointer;
+            transition: var(--transition); display: inline-flex; align-items: center; gap: 8px;
         }
-
-        .btn:hover {
-            background: #22d3ee;
-            box-shadow: 0 0 15px var(--accent-glow);
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 1px solid var(--text-muted);
-            color: var(--text-muted);
-        }
-        
-        .btn-outline:hover {
-            border-color: var(--text-main);
-            color: var(--text-main);
-        }
+        .btn:hover { background: #22d3ee; box-shadow: 0 0 15px var(--accent-glow); }
+        .btn-outline { background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted); }
+        .btn-outline:hover { border-color: var(--text-main); color: var(--text-main); }
 
         .fab {
-            position: fixed;
-            bottom: 2rem;
-            left: 2rem;
-            width: 60px;
-            height: 60px;
-            background: var(--accent);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: #000;
-            box-shadow: 0 10px 25px var(--accent-glow);
-            cursor: pointer;
-            z-index: 900;
+            position: fixed; bottom: 2rem; left: 2rem; width: 60px; height: 60px;
+            background: var(--accent); border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; font-size: 1.5rem; color: #000;
+            box-shadow: 0 10px 25px var(--accent-glow); cursor: pointer; z-index: 900;
             transition: var(--transition);
         }
-        
         .fab:hover { transform: scale(1.1) rotate(90deg); }
 
-        /* Modal */
         .modal {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(5px);
-            z-index: 1000;
-            display: none;
-            align-items: center;
-            justify-content: center;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            z-index: 1000; display: none; align-items: center; justify-content: center;
         }
-
         .modal.active { display: flex; }
-
         .modal-content {
-            background: #1e293b;
-            padding: 2rem;
-            border-radius: var(--border-radius);
-            width: 90%;
-            max-width: 500px;
-            border: 1px solid rgba(255,255,255,0.1);
+            background: #1e293b; padding: 2rem; border-radius: var(--border-radius);
+            width: 90%; max-width: 500px; border: 1px solid rgba(255,255,255,0.1);
         }
-
         input, select, textarea {
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            color: #fff;
-            font-family: 'Tajawal';
+            width: 100%; padding: 12px; margin: 8px 0;
+            background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px; color: #fff; font-family: 'Tajawal';
         }
 
-        input:focus, select:focus {
-            border-color: var(--accent);
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Mobile Responsive */
         @media (max-width: 768px) {
-            .sidebar {
-                display: none; /* Hide standard sidebar */
-            }
-            .main-content {
-                margin-right: 0;
-                width: 100%;
-                padding: 1rem;
-                padding-bottom: 80px; /* Space for bottom nav */
-            }
+            .sidebar { display: none; }
+            .main-content { margin-right: 0; width: 100%; padding: 1rem; padding-bottom: 80px; }
             .mobile-nav {
-                display: flex;
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                background: #1e293b;
-                border-top: 1px solid rgba(255,255,255,0.1);
-                padding: 10px;
-                justify-content: space-around;
-                z-index: 800;
+                display: flex; position: fixed; bottom: 0; left: 0; right: 0;
+                background: #1e293b; border-top: 1px solid rgba(255,255,255,0.1);
+                padding: 10px; justify-content: space-around; z-index: 800;
             }
-            .mobile-nav-item {
-                text-align: center;
-                color: var(--text-muted);
-                font-size: 0.8rem;
-            }
-            .mobile-nav-item i {
-                display: block;
-                font-size: 1.2rem;
-                margin-bottom: 4px;
-            }
-            .mobile-nav-item.active { color: var(--accent); }
             .fab { bottom: 5rem; left: 1.5rem; }
         }
-        
-        @media (min-width: 769px) {
-            .mobile-nav { display: none; }
-        }
-
-        /* Utilities */
+        @media (min-width: 769px) { .mobile-nav { display: none; } }
         .hidden { display: none !important; }
         .text-accent { color: var(--accent); }
-        .flex-between { display: flex; justify-content: space-between; align-items: center; }
-
     </style>
 </head>
 <body>
+
+    <div id="preloader">
+        <div class="loader-text">
+            <span>L</span><span>E</span><span>S</span><span>A</span><span>B</span>
+        </div>
+    </div>
 
     <aside class="sidebar">
         <div class="brand">
             <i class="fa-solid fa-brain"></i> Time Brain V5
         </div>
+        
+        <div class="decision-layer" style="background: transparent; border:none; padding:0;">
+            <div class="kpi-label">متوسط التركيز (7 أيام)</div>
+            <div class="kpi-value" style="font-size:1.5rem;" id="rollingAvg">--%</div>
+        </div>
+
         <div class="nav-menu">
             <div class="nav-item active" onclick="showSection('dashboard')">
                 <i class="fa-solid fa-chart-pie"></i> لوحة القيادة
             </div>
             <div class="nav-item" onclick="showSection('tasks')">
-                <i class="fa-solid fa-list-check"></i> سجل المهام
+                <i class="fa-solid fa-list-check"></i> السجل الزمني
             </div>
-            <div class="nav-item" onclick="exportData()">
-                <i class="fa-solid fa-file-export"></i> تصدير JSON
+            <div class="nav-item" onclick="showSection('ceo')">
+                <i class="fa-solid fa-chess-king"></i> CEO Mode
             </div>
-            <div class="nav-item" style="color: var(--success);" onclick="document.getElementById('fileInput').click()">
-                <i class="fa-solid fa-file-excel"></i> استعادة + Excel
+            <div class="nav-item" style="color: var(--success);" onclick="document.getElementById('excelInput').click()">
+                <i class="fa-solid fa-file-excel"></i> استيراد Excel
             </div>
-            <input type="file" id="fileInput" hidden accept=".json" onchange="importAndConvert(this)">
+            <div class="nav-item" onclick="exportToExcel()">
+                <i class="fa-solid fa-cloud-arrow-down"></i> تصدير Excel
+            </div>
+            <input type="file" id="excelInput" hidden accept=".xlsx, .xls" onchange="importFromExcel(this)">
         </div>
         
         <div style="margin-top: auto;">
-            <div class="kpi-label">تاريخ اليوم</div>
+            <div class="kpi-label">تاريخ التحليل</div>
             <input type="date" id="globalDate" style="background:transparent; border:none; color:var(--accent); font-size:1rem; font-weight:bold;">
         </div>
     </aside>
 
     <main class="main-content">
         
-        <div class="flex-between">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
             <div>
-                <h2 style="margin:0;">أهلاً باسل، <span class="text-accent">جاهز للقرار؟</span></h2>
-                <p class="kpi-label">Sales Analyst | Executive Mode</p>
+                <h2 style="margin:0;">نعم سيدي، <span class="text-accent">باسل</span></h2>
+                <p class="kpi-label">Decision Advisory Active | Amman, Jordan</p>
             </div>
-            <div>
-                <button class="btn btn-outline" onclick="generateCEOReport()"><i class="fa-solid fa-copy"></i> تقرير CEO</button>
+            <div id="riskBadge" class="hidden">
+                <span class="tag-risk"><i class="fa-solid fa-triangle-exclamation"></i> إشارات خطر</span>
+            </div>
+        </div>
+
+        <div id="ceo-section" class="ceo-mode-panel hidden">
+            <h2 class="text-accent"><i class="fa-solid fa-chess-king"></i> الملخص التنفيذي (CEO Mode)</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <div>
+                    <div class="kpi-label">الحالة العامة</div>
+                    <div id="ceoStatus" style="font-size: 1.2rem; font-weight: bold; color: #fff;">تحليل...</div>
+                </div>
+                <div>
+                    <div class="kpi-label">أكبر خطر</div>
+                    <div id="ceoRisk" style="font-size: 1.1rem; color: var(--danger);">لا يوجد</div>
+                </div>
+                <div>
+                    <div class="kpi-label">الفرصة الذهبية</div>
+                    <div id="ceoOpp" style="font-size: 1.1rem; color: var(--success);">تحليل...</div>
+                </div>
+            </div>
+            <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 12px; border-right: 4px solid var(--accent);">
+                <div class="kpi-label text-accent">توصية القرار (The Verdict)</div>
+                <p id="ceoRecommendation" style="font-size: 1.2rem; margin: 0.5rem 0;">جاري معالجة البيانات...</p>
             </div>
         </div>
 
         <div id="dashboard-section">
-            <div class="verdict-box">
-                <div class="kpi-label text-accent"><i class="fa-solid fa-gavel"></i> الحكم اليومي (Daily Verdict)</div>
-                <div class="verdict-text" id="dailyVerdict">جاري تحليل البيانات...</div>
+            
+            <div class="decision-layer">
+                <div class="flex-between" style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <span class="tag-pattern"><i class="fa-solid fa-brain"></i> تحليل الأنماط السلوكية</span>
+                    <span id="patternAlert"></span>
+                </div>
+                <div id="dailyNarrative" class="narrative-text">
+                    جاري بناء القصة اليومية...
+                </div>
+                <div id="smartQuestions" style="margin-top: 15px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);"></div>
             </div>
 
             <div class="dashboard-grid">
                 <div class="card">
-                    <div class="kpi-label">ساعات العمل الكلية</div>
+                    <div class="kpi-label">ساعات العمل (Work)</div>
                     <div class="kpi-value" id="totalHours">00:00</div>
-                    <i class="fa-solid fa-clock kpi-icon"></i>
+                    <i class="fa-solid fa-briefcase kpi-icon"></i>
                 </div>
                 <div class="card">
-                    <div class="kpi-label">ساعات التركيز (Focus)</div>
+                    <div class="kpi-label">التركيز العميق (Deep Work)</div>
                     <div class="kpi-value" style="color: var(--success);" id="focusHours">00:00</div>
                     <i class="fa-solid fa-crosshairs kpi-icon"></i>
                 </div>
                 <div class="card">
-                    <div class="kpi-label">نسبة التركيز %</div>
+                    <div class="kpi-label">الوقت الضائع (Idle Risk)</div>
+                    <div class="kpi-value" style="color: var(--danger);" id="idleHours">00:00</div>
+                    <i class="fa-solid fa-user-clock kpi-icon"></i>
+                </div>
+                <div class="card">
+                    <div class="kpi-label">الكفاءة (Efficiency)</div>
                     <div class="kpi-value" id="focusPercent">0%</div>
-                    <i class="fa-solid fa-percent kpi-icon"></i>
-                </div>
-                <div class="card">
-                    <div class="kpi-label">عدد الزيارات</div>
-                    <div class="kpi-value" id="visitsCount">0</div>
-                    <i class="fa-solid fa-location-dot kpi-icon"></i>
-                </div>
-                <div class="card">
-                    <div class="kpi-label">وقت الوصول</div>
-                    <div class="kpi-value" id="arrivalTime">--:--</div>
-                    <i class="fa-solid fa-door-open kpi-icon"></i>
-                </div>
-                <div class="card">
-                    <div class="kpi-label">الخروج المتوقع</div>
-                    <div class="kpi-value" style="color: var(--warning);" id="exitTime">--:--</div>
-                    <i class="fa-solid fa-person-walking-arrow-right kpi-icon"></i>
+                    <i class="fa-solid fa-chart-line kpi-icon"></i>
                 </div>
             </div>
 
             <div class="dashboard-grid" style="margin-top: 2rem; grid-template-columns: 2fr 1fr;">
                 <div class="card">
-                    <div class="kpi-label">التدفق الزمني (Work Trend)</div>
-                    <canvas id="lineChart" height="150"></canvas>
+                    <div class="kpi-label">التدفق الزمني (Work Flow 9h)</div>
+                    <canvas id="flowChart" height="150"></canvas>
                 </div>
                 <div class="card">
                     <div class="kpi-label">توزيع الجهد</div>
@@ -445,92 +339,377 @@
         </div>
 
         <div id="tasks-section" class="hidden">
-            <h3>سجل الأنشطة (Timeline)</h3>
-            <div id="timelineList" class="timeline-container">
-                </div>
+            <h3>سجل الأنشطة والفجوات (Timeline & Gaps)</h3>
+            <div id="timelineList" style="margin-top: 1rem;"></div>
         </div>
 
     </main>
 
     <div class="mobile-nav">
-        <div class="mobile-nav-item active" onclick="showSection('dashboard')">
-            <i class="fa-solid fa-chart-pie"></i> لوحة
-        </div>
-        <div class="mobile-nav-item" onclick="showSection('tasks')">
-            <i class="fa-solid fa-list"></i> المهام
-        </div>
-        <div class="mobile-nav-item" onclick="generateCEOReport()">
-            <i class="fa-solid fa-file-contract"></i> تقرير
-        </div>
+        <div class="mobile-nav-item active" onclick="showSection('dashboard')"><i class="fa-solid fa-chart-pie"></i> لوحة</div>
+        <div class="mobile-nav-item" onclick="showSection('tasks')"><i class="fa-solid fa-list"></i> المهام</div>
+        <div class="mobile-nav-item" onclick="showSection('ceo')"><i class="fa-solid fa-chess-king"></i> CEO</div>
     </div>
 
-    <div class="fab" onclick="openModal()">
-        <i class="fa-solid fa-plus"></i>
-    </div>
-
+    <div class="fab" onclick="prepareNewTask()"><i class="fa-solid fa-plus"></i></div>
+    
     <div class="modal" id="taskModal">
         <div class="modal-content">
-            <h3 class="text-accent">إضافة نشاط (Activity)</h3>
+            <h3 class="text-accent" id="modalTitle">إضافة مدخل (Context Entry)</h3>
             
-            <label>الفئة (Category)</label>
+            <label>الفئة (Context)</label>
             <select id="taskCat">
-                <option value="Sales Analysis">Sales Analysis (Focus)</option>
-                <option value="Deep Work">Deep Work (Focus)</option>
-                <option value="Forecasting">Forecasting (Focus)</option>
-                <option value="Field Visit">Field Visit</option>
-                <option value="Meeting">Meeting</option>
+                <option value="Sales Analysis">Sales Analysis (Deep Focus)</option>
+                <option value="Deep Work">Deep Work (Core)</option>
+                <option value="Strategy">Strategy & Planning</option>
+                <option value="Field Visit">Field Visit (External)</option>
+                <option value="Meeting">Meeting (Internal)</option>
                 <option value="Arrival">Arrival Check-in</option>
-                <option value="Break">Break / Lunch</option>
-                <option value="Admin Work">Admin Work</option>
+                <option value="Admin Work">Admin / Shallow Work</option>
+                <option value="Break">Break</option>
             </select>
 
             <label>الوصف</label>
             <input type="text" id="taskDesc" placeholder="تفاصيل النشاط...">
 
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <div>
-                    <label>البدء</label>
-                    <input type="time" id="taskStart">
-                </div>
-                <div>
-                    <label>المدة (دقيقة)</label>
-                    <input type="number" id="taskDur" placeholder="مثلاً: 45">
-                </div>
+                <div><label>البدء</label><input type="time" id="taskStart"></div>
+                <div><label>المدة (دقيقة)</label><input type="number" id="taskDur" placeholder="مثلاً: 45"></div>
             </div>
 
             <div style="margin-top: 1rem; display:flex; justify-content: flex-end; gap:10px;">
                 <button class="btn btn-outline" onclick="closeModal()">إلغاء</button>
-                <button class="btn" onclick="saveTask()">حفظ النشاط</button>
+                <button class="btn" id="saveBtn" onclick="saveTask()">تأكيد</button>
             </div>
         </div>
     </div>
 
-    <script>
-        // --- Core Data Engine ---
-        const APP_KEY = 'basel_tasks_v5';
-        let tasks = JSON.parse(localStorage.getItem(APP_KEY)) || [];
-        
-        // Analytics Rules
-        const RULES = {
-            focus: ['Sales Analysis', 'Deep Work', 'Forecasting'],
-            visits: ['Field Visit'],
-            excludeFromTotal: ['Arrival', 'Break']
-        };
-
-        // Init
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('globalDate').valueAsDate = new Date();
-            initCharts();
-            renderDashboard();
+    <div class="modal" id="arrivalModal">
+        <div class="modal-content" style="border-color: var(--accent); text-align: center;">
+            <i class="fa-solid fa-sun fa-3x text-accent" style="margin-bottom: 1rem;"></i>
+            <h2 style="margin: 0;">صباح الخير سيدي باسل</h2>
+            <p style="color: var(--text-muted);">لنبدأ بتسجيل وقت الوصول لضبط الإيقاع.</p>
             
-            // Set default time in modal
-            const now = new Date();
-            document.getElementById('taskStart').value = now.toTimeString().substring(0,5);
+            <label style="text-align: right; display: block;">وقت الوصول</label>
+            <input type="time" id="arrivalInput" style="font-size: 1.5rem; text-align: center;">
+            
+            <button class="btn" style="width: 100%; margin-top: 1rem;" onclick="saveArrival()">تسجيل الوصول</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Preloader Script ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const preloader = document.getElementById('preloader');
+            const spans = preloader.querySelectorAll('span');
+            let delay = 0;
+
+            spans.forEach(span => {
+                span.style.animationDelay = `${delay}ms`;
+                delay += 100;
+            });
+
+            setTimeout(() => { 
+                preloader.style.transform = 'translateY(-100%)'; 
+            }, 1200);
         });
 
-        document.getElementById('globalDate').addEventListener('change', renderDashboard);
+        // --- System Logic ---
+        const APP_KEY = 'basel_brain_v5';
+        let tasks = JSON.parse(localStorage.getItem(APP_KEY)) || [];
+        let editingTaskId = null; // Track ID if editing
 
-        // --- Logic: Data Operations ---
+        const CONTEXT_RULES = {
+            deep: ['Sales Analysis', 'Deep Work', 'Strategy'],
+            shallow: ['Meeting', 'Admin Work'],
+            field: ['Field Visit'],
+            ignore: ['Arrival', 'Break']
+        };
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('globalDate').value = today;
+            
+            initCharts();
+            checkArrivalStatus(today); // Check Arrival
+            runBrainEngine();
+        });
+
+        document.getElementById('globalDate').addEventListener('change', runBrainEngine);
+
+        // --- Logic: Arrival Check ---
+        function checkArrivalStatus(dateStr) {
+            // Check if there is an Arrival task for today
+            const hasArrival = tasks.some(t => t.date === dateStr && t.category === 'Arrival');
+            
+            if (!hasArrival) {
+                // Show dedicated Arrival Modal
+                const now = new Date();
+                document.getElementById('arrivalInput').value = now.toTimeString().substring(0,5);
+                document.getElementById('arrivalModal').classList.add('active');
+            }
+        }
+
+        function saveArrival() {
+            const time = document.getElementById('arrivalInput').value;
+            const date = document.getElementById('globalDate').value;
+            
+            if(time) {
+                tasks.push({
+                    id: Date.now(),
+                    date: date,
+                    category: 'Arrival',
+                    description: 'تسجيل الدخول - بداية اليوم',
+                    startTime: time,
+                    duration: 0
+                });
+                localStorage.setItem(APP_KEY, JSON.stringify(tasks));
+                document.getElementById('arrivalModal').classList.remove('active');
+                runBrainEngine();
+            }
+        }
+
+        // --- Logic: Main Engine ---
+        function runBrainEngine() {
+            const selectedDate = document.getElementById('globalDate').value;
+            const dailyTasks = tasks.filter(t => t.date === selectedDate).sort((a,b) => a.startTime.localeCompare(b.startTime));
+            
+            const metrics = calculateMetrics(dailyTasks);
+            const gapAnalysis = analyzeGaps(dailyTasks);
+            const history = getHistoricalContext(selectedDate);
+            
+            updateDashboard(metrics, gapAnalysis);
+            updateCharts(dailyTasks);
+            renderNarrative(metrics, gapAnalysis, history);
+            renderCEOReport(metrics, gapAnalysis, history);
+            renderTimeline(dailyTasks, gapAnalysis.gaps);
+        }
+
+        function calculateMetrics(dailyTasks) {
+            let totalMin = 0, focusMin = 0, fieldCount = 0;
+            dailyTasks.forEach(t => {
+                if(!CONTEXT_RULES.ignore.includes(t.category)) {
+                    totalMin += t.duration;
+                    if(CONTEXT_RULES.deep.includes(t.category)) focusMin += t.duration;
+                    if(CONTEXT_RULES.field.includes(t.category)) fieldCount++;
+                }
+            });
+            return { totalMin, focusMin, fieldCount, efficiency: totalMin ? Math.round((focusMin/totalMin)*100) : 0 };
+        }
+
+        function analyzeGaps(dailyTasks) {
+            let idleMin = 0;
+            let gaps = [];
+            if(dailyTasks.length < 2) return { idleMin: 0, gaps: [] };
+
+            for(let i=0; i < dailyTasks.length - 1; i++) {
+                const current = dailyTasks[i];
+                const next = dailyTasks[i+1];
+                
+                const [h, m] = current.startTime.split(':').map(Number);
+                const currentEndMin = (h * 60) + m + current.duration;
+                
+                const [nh, nm] = next.startTime.split(':').map(Number);
+                const nextStartMin = (nh * 60) + nm;
+
+                const diff = nextStartMin - currentEndMin;
+                if(diff > 15) {
+                    idleMin += diff;
+                    gaps.push({ start: minToTime(currentEndMin), end: minToTime(nextStartMin), duration: diff });
+                }
+            }
+            return { idleMin, gaps };
+        }
+
+        function getHistoricalContext(currentDate) {
+            let last7Focus = [];
+            let dateIter = new Date(currentDate);
+            for(let i=0; i<7; i++) {
+                dateIter.setDate(dateIter.getDate() - 1);
+                const dStr = dateIter.toISOString().split('T')[0];
+                const dTasks = tasks.filter(t => t.date === dStr);
+                const m = calculateMetrics(dTasks);
+                if(m.totalMin > 0) last7Focus.push(m.efficiency);
+            }
+            const avg = last7Focus.length ? Math.round(last7Focus.reduce((a,b)=>a+b,0)/last7Focus.length) : 0;
+            return { avgFocus: avg };
+        }
+
+        // --- Visualization Updates ---
+        function updateDashboard(m, g) {
+            document.getElementById('totalHours').innerText = minToTime(m.totalMin);
+            document.getElementById('focusHours').innerText = minToTime(m.focusMin);
+            document.getElementById('focusPercent').innerText = m.efficiency + '%';
+            document.getElementById('idleHours').innerText = minToTime(g.idleMin);
+            document.getElementById('rollingAvg').innerText = getHistoricalContext(document.getElementById('globalDate').value).avgFocus + '%';
+            
+            const badge = document.getElementById('riskBadge');
+            if(g.idleMin > 60 || (m.totalMin > 300 && m.efficiency < 30)) badge.classList.remove('hidden');
+            else badge.classList.add('hidden');
+        }
+
+        function renderNarrative(m, g, h) {
+            let story = (m.totalMin === 0) ? "النظام في وضع الاستعداد." : `بدأ اليوم بنشاط. `;
+            if(m.totalMin > 0) {
+                story += (m.efficiency > h.avgFocus) ? `التركيز اليوم (${m.efficiency}%) أعلى من معدلك المعتاد. ` : `التركيز أقل من المعتاد. `;
+                if(g.idleMin > 60) story += `تم رصد فجوات زمنية بمجموع ${minToTime(g.idleMin)}.`;
+            }
+            document.getElementById('dailyNarrative').innerHTML = story;
+        }
+
+        function renderCEOReport(m, g, h) {
+            document.getElementById('ceoStatus').innerText = (m.efficiency > 60) ? "Elite Performance" : "Normal";
+            document.getElementById('ceoRisk').innerText = (g.idleMin > 60) ? "Idle Gaps > 1h" : "None";
+            document.getElementById('ceoOpp').innerText = (m.fieldCount > 0) ? "Market Insights" : "Deep Work";
+            document.getElementById('ceoRecommendation').innerText = (m.efficiency > 60) ? "استمر على هذا النسق." : "راقب الفجوات الزمنية.";
+        }
+
+        function renderTimeline(tasks, gaps) {
+            const container = document.getElementById('timelineList');
+            container.innerHTML = '';
+            let stream = [...tasks.map(t=>({...t, type:'task'})), ...gaps.map(g=>({...g, type:'gap', startTime: g.start}))];
+            stream.sort((a,b) => a.startTime.localeCompare(b.startTime));
+
+            stream.forEach(item => {
+                if(item.type === 'gap') {
+                    container.innerHTML += `<div class="gap-indicator">⚠️ فجوة زمنية (Idle): ${item.duration} دقيقة [${item.start} - ${item.end}]</div>`;
+                } else {
+                    let border = CONTEXT_RULES.deep.includes(item.category) ? 'var(--success)' : 'transparent';
+                    if(item.category === 'Field Visit') border = 'var(--warning)';
+                    
+                    const html = `
+                    <div class="activity-item" style="border-right-color:${border}">
+                        <div class="activity-time">${item.startTime}</div>
+                        <div style="flex-grow:1; padding:0 1rem;">
+                            <span class="insight-tag" style="background:rgba(255,255,255,0.1); margin:0;">${item.category}</span>
+                            <div style="margin-top:5px;">${item.description}</div>
+                        </div>
+                        <div style="font-size:0.9rem; color:var(--text-muted)">${item.duration} د</div>
+                        
+                        <button class="btn-outline" style="border:none; color:var(--accent); margin-right:5px;" onclick="editTask(${item.id})">
+                             <i class="fa-solid fa-pen"></i>
+                        </button>
+
+                        <button class="btn-outline" style="border:none; color:var(--danger); margin-right:5px;" onclick="deleteTask(${item.id})">
+                             <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>`;
+                    container.innerHTML += html;
+                }
+            });
+        }
+
+        // --- Charts ---
+        let flowChart = null;
+        let donutChart = null;
+
+        function initCharts() {
+            const ctxD = document.getElementById('donutChart').getContext('2d');
+            donutChart = new Chart(ctxD, {
+                type: 'doughnut',
+                data: { labels: [], datasets: [{ data: [], backgroundColor: ['#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#64748b'] }] },
+                options: { responsive: true, plugins: { legend: { position: 'right', labels: { color: '#fff', font: {family:'Tajawal'} } } }, cutout: '70%' }
+            });
+
+            // Flow Chart Init (Empty, will be updated by data)
+            const ctxF = document.getElementById('flowChart').getContext('2d');
+            flowChart = new Chart(ctxF, {
+                type: 'bar',
+                data: { labels: [], datasets: [{ label: 'Focus', data: [], backgroundColor: [], borderRadius: 4 }] },
+                options: { 
+                    scales: { 
+                        y: { 
+                            max: 60, // Fixed capacity (60 mins per hour)
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { display: false }
+                        }, 
+                        x: { 
+                            grid: { display: false }, 
+                            ticks: { color: '#94a3b8' } 
+                        } 
+                    }, 
+                    plugins: { legend: { display: false } } 
+                }
+            });
+        }
+
+        function updateCharts(dailyTasks) {
+            // 1. Donut
+            const catMap = {};
+            dailyTasks.forEach(t => { if(t.duration > 0) catMap[t.category] = (catMap[t.category]||0) + t.duration; });
+            donutChart.data.labels = Object.keys(catMap);
+            donutChart.data.datasets[0].data = Object.values(catMap);
+            donutChart.update();
+
+            // 2. Flow Chart (Dynamic Axis based on Arrival)
+            // A. Find Arrival Time
+            const arrivalTask = dailyTasks.find(t => t.category === 'Arrival');
+            let startHour = 8; // Default
+            if (arrivalTask) {
+                startHour = parseInt(arrivalTask.startTime.split(':')[0]);
+            }
+
+            // B. Generate 9 Hours Axis
+            const labels = [];
+            const dataPoints = [];
+            const bgColors = [];
+            
+            // Loop for 9 hours (Standard shift)
+            for(let i=0; i <= 9; i++) {
+                const h = startHour + i;
+                const hStr = (h % 24).toString().padStart(2, '0') + ':00';
+                labels.push(hStr);
+                
+                // Calculate total duration in this hour
+                let totalDur = 0;
+                dailyTasks.forEach(t => {
+                    const tHour = parseInt(t.startTime.split(':')[0]);
+                    if(tHour === h) totalDur += t.duration;
+                });
+                dataPoints.push(totalDur);
+
+                // Smart Coloring (Behavioral Heatmap)
+                if(totalDur > 45) bgColors.push('#10b981'); // Green (Deep)
+                else if (totalDur > 20) bgColors.push('#06b6d4'); // Blue (Normal)
+                else bgColors.push('rgba(239, 68, 68, 0.4)'); // Red (Idle/Gap)
+            }
+
+            // C. Update Chart
+            flowChart.data.labels = labels;
+            flowChart.data.datasets[0].data = dataPoints;
+            flowChart.data.datasets[0].backgroundColor = bgColors;
+            flowChart.update();
+        }
+
+        // --- CRUD & Excel Logic ---
+
+        function prepareNewTask() {
+            editingTaskId = null;
+            document.getElementById('modalTitle').innerText = "إضافة مدخل (Context Entry)";
+            document.getElementById('saveBtn').innerText = "تأكيد";
+            document.getElementById('taskDesc').value = "";
+            document.getElementById('taskDur').value = "";
+            const now = new Date();
+            document.getElementById('taskStart').value = now.toTimeString().substring(0,5);
+            openModal();
+        }
+
+        function editTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if(!task) return;
+
+            editingTaskId = id; // Set edit mode
+            document.getElementById('modalTitle').innerText = "تعديل المدخل (Edit)";
+            document.getElementById('saveBtn').innerText = "تحديث";
+            
+            document.getElementById('taskCat').value = task.category;
+            document.getElementById('taskDesc').value = task.description;
+            document.getElementById('taskStart').value = task.startTime;
+            document.getElementById('taskDur').value = task.duration;
+            
+            openModal();
+        }
 
         function saveTask() {
             const date = document.getElementById('globalDate').value;
@@ -539,307 +718,97 @@
             const start = document.getElementById('taskStart').value;
             const duration = parseInt(document.getElementById('taskDur').value) || 0;
 
-            if(!start) return alert('يرجى تحديد وقت البدء');
+            if(!start) return alert('يرجى تحديد الوقت');
 
-            // Calculate End Time logic could be added here for overlap check
-            
-            const newTask = {
-                id: Date.now(),
-                date: date,
-                category: category,
-                description: desc,
-                startTime: start,
-                duration: duration
-            };
-
-            // Overlap Warning (Simplified)
-            const overlap = tasks.find(t => t.date === date && t.startTime === start);
-            if(overlap) {
-                if(!confirm('يوجد نشاط آخر في نفس وقت البدء. هل تريد المتابعة؟')) return;
+            if(editingTaskId) {
+                // UPDATE Existing
+                const index = tasks.findIndex(t => t.id === editingTaskId);
+                if(index !== -1) {
+                    tasks[index] = { ...tasks[index], date, category, description: desc, startTime: start, duration };
+                }
+            } else {
+                // CREATE New
+                tasks.push({ id: Date.now(), date, category, description: desc, startTime: start, duration });
             }
 
-            tasks.push(newTask);
-            tasks.sort((a,b) => a.startTime.localeCompare(b.startTime));
             localStorage.setItem(APP_KEY, JSON.stringify(tasks));
-            
             closeModal();
-            renderDashboard();
+            runBrainEngine();
         }
 
         function deleteTask(id) {
-            if(confirm('حذف هذا السجل؟')) {
+            if(confirm('هل أنت متأكد سيدي؟')) {
                 tasks = tasks.filter(t => t.id !== id);
                 localStorage.setItem(APP_KEY, JSON.stringify(tasks));
-                renderDashboard();
+                runBrainEngine();
             }
         }
 
-        // --- Logic: Rendering & Analytics ---
-
-        function renderDashboard() {
-            const selectedDate = document.getElementById('globalDate').value;
-            const dailyTasks = tasks.filter(t => t.date === selectedDate);
+        // EXPORT: Dump EVERYTHING (Database Mirror)
+        function exportToExcel() {
+            const ws_raw = XLSX.utils.json_to_sheet(tasks);
             
-            // 1. Calculations
-            let totalMin = 0;
-            let focusMin = 0;
-            let visits = 0;
-            let arrival = '--:--';
+            const summaryData = tasks.map(t => ({
+                Date: t.date,
+                Time: t.startTime,
+                Category: t.category,
+                Duration_Min: t.duration,
+                Description: t.description
+            }));
+            const ws_view = XLSX.utils.json_to_sheet(summaryData);
 
-            dailyTasks.forEach(t => {
-                // Arrival
-                if(t.category === 'Arrival') arrival = t.startTime;
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws_view, "Readable_Log");
+            XLSX.utils.book_append_sheet(wb, ws_raw, "Database_Raw"); // The key for Restore
+
+            XLSX.writeFile(wb, "TimeBrain_Full_Backup.xlsx");
+        }
+
+        // IMPORT: Read "Database_Raw" and Restore
+        function importFromExcel(input) {
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
                 
-                // Visits
-                if(RULES.visits.includes(t.category)) visits++;
+                let targetSheet = workbook.SheetNames.find(n => n === "Database_Raw");
+                if(!targetSheet) targetSheet = workbook.SheetNames[0];
 
-                // Focus & Total
-                if(!RULES.excludeFromTotal.includes(t.category)) {
-                    totalMin += t.duration;
-                    if(RULES.focus.includes(t.category)) {
-                        focusMin += t.duration;
+                const json = XLSX.utils.sheet_to_json(workbook.Sheets[targetSheet]);
+                
+                if(json && json.length > 0) {
+                    if(confirm(`تم العثور على ${json.length} سجل. هل تريد استعادة قاعدة البيانات بالكامل؟`)) {
+                        tasks = json;
+                        localStorage.setItem(APP_KEY, JSON.stringify(tasks));
+                        location.reload();
                     }
+                } else {
+                    alert('الملف لا يحتوي على بيانات صالحة.');
                 }
-            });
-
-            // 2. Update UI Cards
-            document.getElementById('totalHours').innerText = minToTime(totalMin);
-            document.getElementById('focusHours').innerText = minToTime(focusMin);
-            document.getElementById('visitsCount').innerText = visits;
-            document.getElementById('arrivalTime').innerText = arrival;
-            
-            const focusPct = totalMin > 0 ? Math.round((focusMin / totalMin) * 100) : 0;
-            document.getElementById('focusPercent').innerText = focusPct + '%';
-
-            // Calculate Expected Exit (Assuming 8.5 hours from arrival if exists)
-            if(arrival !== '--:--') {
-                const [h, m] = arrival.split(':').map(Number);
-                const exitDate = new Date();
-                exitDate.setHours(h + 9, m + 00);
-                document.getElementById('exitTime').innerText = 
-                    exitDate.getHours().toString().padStart(2,'0') + ':' + 
-                    exitDate.getMinutes().toString().padStart(2,'0');
-            } else {
-                document.getElementById('exitTime').innerText = '--:--';
-            }
-
-            // 3. Daily Verdict
-            generateVerdict(focusPct, visits, totalMin);
-
-            // 4. Update Charts
-            updateCharts(dailyTasks);
-
-            // 5. Render Timeline
-            renderTimeline(dailyTasks);
+            };
+            reader.readAsArrayBuffer(file);
         }
-
-        function generateVerdict(focusPct, visits, totalMin) {
-            const el = document.getElementById('dailyVerdict');
-            let text = "";
-            
-            if(totalMin < 10) {
-                text = "يوم جديد.. بانتظار بدء العمليات.";
-            } else if (focusPct > 60) {
-                text = "🔥 أداء استثنائي! تركيز عالي جداً في المهام التحليلية. هذا يوم إنتاجية حقيقية.";
-            } else if (visits > 2) {
-                text = "📍 يوم ميداني نشط. البيانات القادمة من السوق ستكون غزيرة اليوم.";
-            } else if (focusPct < 30 && totalMin > 200) {
-                text = "⚠️ تحذير: يوم مزدحم ولكن بإنتاجية منخفضة (Low Focus). تشتت عالي.";
-            } else {
-                text = "يوم متوازن. الأداء ضمن المعدلات الطبيعية.";
-            }
-            el.innerText = text;
-        }
-
-        function renderTimeline(dailyTasks) {
-            const container = document.getElementById('timelineList');
-            container.innerHTML = '';
-            
-            dailyTasks.forEach(t => {
-                let borderShow = RULES.focus.includes(t.category) ? 'border-color: var(--success);' : '';
-                if(t.category === 'Arrival') borderShow = 'border-color: var(--accent);';
-
-                const html = `
-                <div class="activity-item" style="${borderShow}">
-                    <div class="activity-time">${t.startTime}</div>
-                    <div class="activity-details">
-                        <span class="activity-category" style="color:var(--accent)">${t.category}</span>
-                        <div style="font-size:0.95rem;">${t.description}</div>
-                        <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
-                            ${t.duration > 0 ? t.duration + ' دقيقة' : ''}
-                        </div>
-                    </div>
-                    <button class="btn-outline" style="border:none; color:var(--danger)" onclick="deleteTask(${t.id})">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </div>`;
-                container.innerHTML += html;
-            });
-        }
-
-        // --- Charts ---
-        let lineChartInstance = null;
-        let donutChartInstance = null;
-
-        function initCharts() {
-            // Line Chart
-            const ctxL = document.getElementById('lineChart').getContext('2d');
-            lineChartInstance = new Chart(ctxL, {
-                type: 'line',
-                data: { labels: [], datasets: [{ label: 'المدة (دقيقة)', data: [], borderColor: '#06b6d4', tension: 0.4 }] },
-                options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { display: false } } }
-            });
-
-            // Donut Chart
-            const ctxD = document.getElementById('donutChart').getContext('2d');
-            donutChartInstance = new Chart(ctxD, {
-                type: 'doughnut',
-                data: { labels: [], datasets: [{ data: [], backgroundColor: ['#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#6366f1'] }] },
-                options: { responsive: true, plugins: { legend: { position: 'right', labels: { color: '#fff' } } }, cutout: '70%' }
-            });
-        }
-
-        function updateCharts(data) {
-            // Prep data for Donut
-            const catMap = {};
-            data.forEach(t => {
-                if(t.duration > 0) {
-                    catMap[t.category] = (catMap[t.category] || 0) + t.duration;
-                }
-            });
-            
-            donutChartInstance.data.labels = Object.keys(catMap);
-            donutChartInstance.data.datasets[0].data = Object.values(catMap);
-            donutChartInstance.update();
-
-            // Prep data for Line (Trend)
-            lineChartInstance.data.labels = data.map(t => t.startTime);
-            lineChartInstance.data.datasets[0].data = data.map(t => t.duration);
-            lineChartInstance.update();
-        }
-
-        // --- Utilities ---
 
         function minToTime(min) {
             const h = Math.floor(min / 60);
             const m = min % 60;
             return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
         }
-
         function openModal() { document.getElementById('taskModal').classList.add('active'); }
         function closeModal() { document.getElementById('taskModal').classList.remove('active'); }
-
         function showSection(id) {
-            if(id === 'dashboard') {
-                document.getElementById('dashboard-section').classList.remove('hidden');
-                document.getElementById('tasks-section').classList.add('hidden');
-            } else {
-                document.getElementById('dashboard-section').classList.add('hidden');
-                document.getElementById('tasks-section').classList.remove('hidden');
+            document.querySelectorAll('.mobile-nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById('dashboard-section').classList.add('hidden');
+            document.getElementById('tasks-section').classList.add('hidden');
+            document.getElementById('ceo-section').classList.add('hidden');
+            
+            if(id === 'dashboard') document.getElementById('dashboard-section').classList.remove('hidden');
+            else if (id === 'tasks') document.getElementById('tasks-section').classList.remove('hidden');
+            else if (id === 'ceo') {
+                document.getElementById('ceo-section').classList.remove('hidden');
+                document.getElementById('ceo-section').classList.add('active');
             }
-        }
-
-        // --- EXPORT / IMPORT ENGINE (The Core Value) ---
-
-        function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(tasks));
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "basel_time_brain_backup.json");
-            document.body.appendChild(downloadAnchorNode);
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
-        }
-
-        function importAndConvert(input) {
-            const file = input.files[0];
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const json = JSON.parse(e.target.result);
-                // Save to local
-                localStorage.setItem(APP_KEY, JSON.stringify(json));
-                tasks = json;
-                
-                // AUTO CONVERT TO EXCEL
-                generateExcelReport(json);
-                
-                alert('تمت الاستعادة وتوليد ملف Excel بنجاح!');
-                location.reload();
-            };
-            reader.readAsText(file);
-        }
-
-        function generateExcelReport(data) {
-            // Organize Data into Sheets
-            // Sheet 1: Daily Summary (Need to aggregate by date)
-            const summaryMap = {};
-            data.forEach(t => {
-                if(!summaryMap[t.date]) summaryMap[t.date] = { date: t.date, totalMin: 0, focusMin: 0, visits: 0 };
-                if(!RULES.excludeFromTotal.includes(t.category)) summaryMap[t.date].totalMin += t.duration;
-                if(RULES.focus.includes(t.category)) summaryMap[t.date].focusMin += t.duration;
-                if(RULES.visits.includes(t.category)) summaryMap[t.date].visits++;
-            });
-            const sheet1Data = Object.values(summaryMap).map(d => ({
-                Date: d.date,
-                Total_Hours: (d.totalMin/60).toFixed(2),
-                Focus_Hours: (d.focusMin/60).toFixed(2),
-                Visits: d.visits,
-                Focus_Percentage: d.totalMin ? ((d.focusMin/d.totalMin)*100).toFixed(1)+'%' : '0%'
-            }));
-
-            // Sheet 2: Tasks Log (Raw)
-            const sheet2Data = data.map(t => ({
-                Date: t.date,
-                Category: t.category,
-                Start: t.startTime,
-                Duration_Min: t.duration,
-                Description: t.description
-            }));
-
-            // Sheet 3: Focus Analysis
-            const sheet3Data = data.filter(t => RULES.focus.includes(t.category)).map(t => ({
-                Date: t.date,
-                Type: t.category,
-                Duration: t.duration,
-                Note: t.description
-            }));
-
-            // Sheet 4: Visits
-            const sheet4Data = data.filter(t => RULES.visits.includes(t.category)).map(t => ({
-                Date: t.date,
-                Client_Location: t.description,
-                Time: t.startTime
-            }));
-
-            // Create Workbook
-            const wb = XLSX.utils.book_new();
-            
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheet1Data), "Daily Summary");
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheet2Data), "Tasks Log");
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheet3Data), "Focus Analysis");
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheet4Data), "Visits Report");
-
-            // Write File
-            XLSX.writeFile(wb, "TimeBrain_Executive_Report.xlsx");
-        }
-
-        function generateCEOReport() {
-            const tHours = document.getElementById('totalHours').innerText;
-            const fPct = document.getElementById('focusPercent').innerText;
-            const vCount = document.getElementById('visitsCount').innerText;
-            const date = document.getElementById('globalDate').value;
-            
-            const text = `*CEO Report - ${date}*
-----------
-⏱️ Working Hours: ${tHours}
-🧠 Focus Rate: ${fPct}
-📍 Field Visits: ${vCount}
-----------
-Generated by Time Brain V5`;
-
-            navigator.clipboard.writeText(text).then(() => {
-                alert('تم نسخ التقرير المختصر!');
-            });
         }
     </script>
 </body>
