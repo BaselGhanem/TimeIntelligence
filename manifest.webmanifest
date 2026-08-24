@@ -1,1 +1,1 @@
-{"name":"Time Brain V6","short_name":"Time Brain","start_url":"./","display":"standalone","background_color":"#081116","theme_color":"#099999","lang":"ar","dir":"rtl"}
+{"name":"Time Brain V6","short_name":"Time Brain","start_url":"./","scope":"./","display":"standalone","background_color":"#081116","theme_color":"#099999","lang":"ar","dir":"rtl","icons":[{"src":"icons/icon-192.png","sizes":"192x192","type":"image/png"},{"src":"icons/icon-512.png","sizes":"512x512","type":"image/png"}]}

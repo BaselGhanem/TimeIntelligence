@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#099999">
   <title>Time Brain V6 | Personal Work Intelligence</title>
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -56,8 +58,8 @@
       </div>
 
       <div class="grid-2">
-        <article class="panel"><div class="panel-title"><span>Work Flow — توزيع دقيق على الساعات</span><span id="workWindowLabel"></span></div><canvas id="flowChart"></canvas></article>
-        <article class="panel"><div class="panel-title">توزيع الجهد</div><canvas id="donutChart"></canvas></article>
+        <article class="panel"><div class="panel-title"><span>Work Flow — توزيع دقيق على الساعات</span><span id="workWindowLabel"></span></div><div class="chart-shell chart-flow"><canvas id="flowChart"></canvas></div></article>
+        <article class="panel"><div class="panel-title">توزيع الجهد</div><div class="chart-shell chart-donut"><canvas id="donutChart"></canvas></div></article>
       </div>
 
       <article class="panel narrative"><div class="panel-title">ملخص اليوم</div><div id="dailyNarrative"></div></article>
@@ -78,7 +80,7 @@
     <section id="insights-section" class="section">
       <div class="section-head"><div><h2>Behavior Intelligence</h2><p>مقارنات شخصية مبنية على تاريخك بدل حدود عامة ثابتة.</p></div></div>
       <div id="insightCards" class="insight-grid"></div>
-      <article class="panel"><div class="panel-title">7 / 14 / 30 / 90 يوم</div><div class="range-tabs"><button class="chip active" data-range="7">7D</button><button class="chip" data-range="14">14D</button><button class="chip" data-range="30">30D</button><button class="chip" data-range="90">90D</button></div><canvas id="trendChart"></canvas></article>
+      <article class="panel"><div class="panel-title">7 / 14 / 30 / 90 يوم</div><div class="range-tabs"><button class="chip active" data-range="7">7D</button><button class="chip" data-range="14">14D</button><button class="chip" data-range="30">30D</button><button class="chip" data-range="90">90D</button></div><div class="chart-shell chart-trend"><canvas id="trendChart"></canvas></div></article>
     </section>
 
     <section id="ceo-section" class="section">

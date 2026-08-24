@@ -80,3 +80,11 @@
 
 ## Migration
 عند أول تشغيل، إذا وجد المشروع بيانات `basel_brain_v5` القديمة، يحاول ترحيلها إلى V6 تلقائيًا مع إنشاء Workday من Arrival القديم.
+
+## V6.1 stability fixes
+- Added a real `favicon.ico` plus 192px/512px PWA icons and manifest references.
+- Fixed Chart.js runaway page growth by placing every canvas in a bounded responsive `.chart-shell`.
+- Added explicit responsive chart heights for desktop, tablet, and mobile.
+- Updated Service Worker cache to `timebrain-v6-2` so old CSS/JS is evicted after deployment.
+- Service Worker now handles only same-origin assets and uses the HTML fallback only for navigation requests.
+- Revalidated JavaScript syntax, static element references, modal references, local assets, duplicate IDs, and CSS brace balance.
